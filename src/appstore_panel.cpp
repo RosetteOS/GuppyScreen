@@ -98,6 +98,34 @@ static uint64_t get_system_cpu_jiffies() {
 
 static uint64_t get_pid_cpu_jiffies(int pid) {
   if (pid <= 0) return 0;
+  uint64_t total_jiffies = 0;
+
+  // Sum CPU jiffies across all threads in /proc/<pid>/task/
+  std::string task_dir = "/proc/" + std::to_string(pid) + "/task";
+  if (fs::exists(task_dir)) {
+    try {
+      for (const auto &entry : fs::directory_iterator(task_dir)) {
+        std::string tid_stat = entry.path().string() + "/stat";
+        std::ifstream f(tid_stat);
+        if (!f.is_open()) continue;
+        std::string content;
+        if (std::getline(f, content)) {
+          size_t rparen = content.rfind(')');
+          if (rparen != std::string::npos && rparen + 2 < content.size()) {
+            std::istringstream ss(content.substr(rparen + 2));
+            std::string field;
+            for (int i = 1; i <= 11 && ss >> field; ++i) {}
+            uint64_t utime = 0, stime = 0;
+            if (ss >> utime >> stime) {
+              total_jiffies += (utime + stime);
+            }
+          }
+        }
+      }
+      if (total_jiffies > 0) return total_jiffies;
+    } catch (...) {}
+  }
+
   std::ifstream f("/proc/" + std::to_string(pid) + "/stat");
   if (!f.is_open()) return 0;
   std::string content;
@@ -145,12 +173,24 @@ static int find_running_pid(const AppItem &app) {
           std::string fname = entry.path().filename().string();
           if (!fname.empty() && std::isdigit(fname[0])) {
             int p = std::stoi(fname);
+            // 1. Check comm
             std::string comm_path = entry.path().string() + "/comm";
             if (fs::exists(comm_path)) {
               std::ifstream cf(comm_path);
               std::string comm;
               if (cf >> comm && (comm == app.id || comm.find(app.id) != std::string::npos)) {
                 return p;
+              }
+            }
+            // 2. Check cmdline for Python and script daemons
+            std::string cmd_path = entry.path().string() + "/cmdline";
+            if (fs::exists(cmd_path)) {
+              std::ifstream cmdf(cmd_path);
+              std::string cmd;
+              if (std::getline(cmdf, cmd)) {
+                if (cmd.find(app.id) != std::string::npos) {
+                  return p;
+                }
               }
             }
           }
@@ -181,7 +221,7 @@ static void inspect_all_app_resources(std::vector<AppItem> &apps_list) {
     proc1[i] = get_pid_cpu_jiffies(active_pids[i].second);
   }
 
-  usleep(60000); // 60ms sampling window
+  usleep(150000); // 150ms sampling window for accurate tick resolution on 100Hz kernel
 
   uint64_t sys2 = get_system_cpu_jiffies();
   std::vector<uint64_t> proc2(active_pids.size(), 0);
