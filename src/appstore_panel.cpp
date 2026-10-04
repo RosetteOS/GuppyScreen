@@ -1482,7 +1482,7 @@ void AppStorePanel::parse_appstore_output_line(const std::string &line) {
     progress_stage_str = "Configuring system services...";
     progress_detail_str = "Registering components";
   } else if (line.find("Successfully installed") != std::string::npos ||
-             (line.find("OK") != std::string::npos && (line.find("service") != std::string::npos || line.find("Started") != std::string::npos || line.find("Stopped") != std::string::npos || line.find("Enabled") != std::string::npos || line.find("Disabled") != std::string::npos))) {
+             (line.find("OK") != std::string::npos && (line.find("service") != std::string::npos || line.find("Started") != std::string::npos || line.find("Stopping") != std::string::npos || line.find("Stopped") != std::string::npos || line.find("Enabled") != std::string::npos || line.find("Disabled") != std::string::npos))) {
     progress_percent.store(100);
     std::lock_guard<std::mutex> lock(progress_mutex);
     progress_stage_str = "Service operation complete!";
@@ -1503,6 +1503,7 @@ void AppStorePanel::stream_process_output(const std::string &cmd, const std::str
     task_error_msg.clear();
   }
   progress_percent.store(0);
+  task_exit_code.store(0);
 
   try {
     auto proc = sp::Popen(cmd + " 2>&1", sp::shell{true}, sp::output{sp::PIPE});
@@ -1823,7 +1824,16 @@ void AppStorePanel::check_async_task() {
     task_finished.store(false);
     close_modal();
 
-    if (task_exit_code.load() == 0) {
+    bool is_success = (task_exit_code.load() == 0);
+    if (!is_success) {
+      if (progress_percent.load() == 100 || progress_stage_str.find("complete") != std::string::npos) {
+        is_success = true;
+      } else if (!task_error_msg.empty() && (task_error_msg.find("OK") != std::string::npos || task_error_msg.find("Stopped") != std::string::npos || task_error_msg.find("Started") != std::string::npos)) {
+        is_success = true;
+      }
+    }
+
+    if (is_success) {
       refresh_apps();
       build_app_list();
     } else {
