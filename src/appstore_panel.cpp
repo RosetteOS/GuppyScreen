@@ -1512,10 +1512,12 @@ void AppStorePanel::stream_process_output(const std::string &cmd, const std::str
   }
 
   std::string line;
+  std::string last_output_line;
   int c;
   while ((c = fgetc(pipe)) != EOF) {
     if (c == '\r' || c == '\n') {
       if (!line.empty()) {
+        last_output_line = line;
         parse_appstore_output_line(line);
         line.clear();
       }
@@ -1524,12 +1526,16 @@ void AppStorePanel::stream_process_output(const std::string &cmd, const std::str
     }
   }
   if (!line.empty()) {
+    last_output_line = line;
     parse_appstore_output_line(line);
   }
 
   int status = pclose(pipe);
   int exit_code = WIFEXITED(status) ? WEXITSTATUS(status) : 1;
   task_exit_code.store(exit_code);
+  if (exit_code != 0 && task_error_msg.empty() && !last_output_line.empty()) {
+    task_error_msg = last_output_line;
+  }
 }
 
 void AppStorePanel::show_progress_modal(const std::string &title, const std::string &initial_stage) {
