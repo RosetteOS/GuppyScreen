@@ -248,7 +248,8 @@ struct AppCpuHistory {
 };
 static std::map<std::string, AppCpuHistory> g_app_cpu_history;
 
-static void inspect_all_app_resources(std::vector<AppItem> &apps_list) {
+static bool inspect_all_app_resources(std::vector<AppItem> &apps_list) {
+  bool state_changed = false;
   std::vector<std::pair<size_t, std::vector<int>>> active_apps;
   for (size_t i = 0; i < apps_list.size(); ++i) {
     auto &app = apps_list[i];
@@ -256,10 +257,24 @@ static void inspect_all_app_resources(std::vector<AppItem> &apps_list) {
     if (!pids.empty()) {
       app.pid = pids[0];
       active_apps.emplace_back(i, pids);
+      if (app.has_service && app.service_status != "running") {
+        app.service_status = "running";
+        state_changed = true;
+      }
+    } else {
+      app.pid = -1;
+      app.cpu_percent = 0.0;
+      app.ram_mb = 0.0;
+      app.ram_str = "";
+      app.resource_summary = "";
+      if (app.has_service && app.service_status == "running") {
+        app.service_status = "stopped";
+        state_changed = true;
+      }
     }
   }
 
-  if (active_apps.empty()) return;
+  if (active_apps.empty()) return state_changed;
 
   auto now = std::chrono::steady_clock::now();
   int ncpus = sysconf(_SC_NPROCESSORS_ONLN);
@@ -348,6 +363,7 @@ static void inspect_all_app_resources(std::vector<AppItem> &apps_list) {
       }
     }
   }
+  return state_changed;
 }
 
 AppStorePanel::AppStorePanel(KWebSocketClient &c)
@@ -1110,7 +1126,11 @@ void AppStorePanel::build_app_list() {
 void AppStorePanel::update_live_resources() {
   if (!is_visible || is_busy.load() || apps.empty()) return;
 
-  inspect_all_app_resources(apps);
+  bool state_changed = inspect_all_app_resources(apps);
+  if (state_changed) {
+    build_app_list();
+    return;
+  }
 
   for (const auto &app : apps) {
     auto it = app_res_labels.find(app.id);
