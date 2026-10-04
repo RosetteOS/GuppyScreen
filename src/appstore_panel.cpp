@@ -9,6 +9,7 @@
 #include <sstream>
 #include <cstdint>
 #include <chrono>
+#include <set>
 #include <unistd.h>
 #include <experimental/filesystem>
 
