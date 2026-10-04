@@ -405,12 +405,17 @@ AppStorePanel::AppStorePanel(KWebSocketClient &c)
   lv_obj_set_style_border_width(list_cont, 0, 0);
 
   poll_timer = lv_timer_create(AppStorePanel::_timer_callback, 300, this);
+  live_resource_timer = lv_timer_create(AppStorePanel::_resource_timer_callback, 1000, this);
 }
 
 AppStorePanel::~AppStorePanel() {
   if (poll_timer != nullptr) {
     lv_timer_del(poll_timer);
     poll_timer = nullptr;
+  }
+  if (live_resource_timer != nullptr) {
+    lv_timer_del(live_resource_timer);
+    live_resource_timer = nullptr;
   }
   close_modal();
   if (worker_thread.joinable()) {
@@ -423,12 +428,14 @@ AppStorePanel::~AppStorePanel() {
 }
 
 void AppStorePanel::foreground() {
+  is_visible = true;
   refresh_apps();
   build_app_list();
   lv_obj_move_foreground(cont);
 }
 
 void AppStorePanel::background() {
+  is_visible = false;
   lv_obj_move_background(cont);
 }
 
@@ -667,6 +674,7 @@ void AppStorePanel::refresh_apps() {
 
 void AppStorePanel::build_app_list() {
   lv_obj_clean(list_cont);
+  app_res_labels.clear();
 
   std::vector<size_t> visible_indices;
   for (size_t i = 0; i < apps.size(); ++i) {
@@ -1073,16 +1081,20 @@ void AppStorePanel::build_app_list() {
     lv_obj_set_style_text_font(meta_lbl, &lv_font_montserrat_12, 0);
     lv_obj_set_style_text_color(meta_lbl, lv_palette_lighten(LV_PALETTE_GREY, 1), 0);
 
-    // Resource Usage Row (Prominently displayed whenever active/running)
+    // Resource Usage Row (Live updated once per second)
+    lv_obj_t *res_lbl = lv_label_create(card);
+    lv_obj_set_width(res_lbl, LV_PCT(100));
+    lv_label_set_recolor(res_lbl, true);
+    lv_obj_set_style_text_font(res_lbl, &lv_font_montserrat_12, 0);
+    lv_obj_set_style_text_color(res_lbl, lv_palette_lighten(LV_PALETTE_BLUE, 1), 0);
     if (!app.resource_summary.empty()) {
-      lv_obj_t *res_lbl = lv_label_create(card);
-      lv_obj_set_width(res_lbl, LV_PCT(100));
       std::string res_text = fmt::format("#64B5F6 [ {} ]#", app.resource_summary);
       lv_label_set_text(res_lbl, res_text.c_str());
-      lv_label_set_recolor(res_lbl, true);
-      lv_obj_set_style_text_font(res_lbl, &lv_font_montserrat_12, 0);
-      lv_obj_set_style_text_color(res_lbl, lv_palette_lighten(LV_PALETTE_BLUE, 1), 0);
+    } else {
+      lv_label_set_text(res_lbl, "");
+      lv_obj_add_flag(res_lbl, LV_OBJ_FLAG_HIDDEN);
     }
+    app_res_labels[app.id] = res_lbl;
 
     // Bottom Row: Description (Full Width)
     if (!app.description.empty()) {
@@ -1091,6 +1103,26 @@ void AppStorePanel::build_app_list() {
       lv_label_set_text(desc_lbl, app.description.c_str());
       lv_obj_set_style_text_font(desc_lbl, &lv_font_montserrat_12, 0);
       lv_obj_set_style_text_color(desc_lbl, lv_palette_main(LV_PALETTE_GREY), 0);
+    }
+  }
+}
+
+void AppStorePanel::update_live_resources() {
+  if (!is_visible || is_busy.load() || apps.empty()) return;
+
+  inspect_all_app_resources(apps);
+
+  for (const auto &app : apps) {
+    auto it = app_res_labels.find(app.id);
+    if (it != app_res_labels.end() && it->second != nullptr) {
+      if (!app.resource_summary.empty()) {
+        std::string res_text = fmt::format("#64B5F6 [ {} ]#", app.resource_summary);
+        lv_label_set_text(it->second, res_text.c_str());
+        lv_obj_clear_flag(it->second, LV_OBJ_FLAG_HIDDEN);
+      } else {
+        lv_label_set_text(it->second, "");
+        lv_obj_add_flag(it->second, LV_OBJ_FLAG_HIDDEN);
+      }
     }
   }
 }

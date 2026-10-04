@@ -8,6 +8,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <mutex>
 #include <thread>
 #include <atomic>
@@ -68,9 +69,15 @@ class AppStorePanel {
     panel->check_async_task();
   }
 
+  static void _resource_timer_callback(lv_timer_t *timer) {
+    auto *panel = static_cast<AppStorePanel*>(timer->user_data);
+    panel->update_live_resources();
+  }
+
   void handle_callback(lv_event_t *event);
   void build_category_bar();
   void build_app_list();
+  void update_live_resources();
   void show_install_confirm(const AppItem &app);
   void show_update_confirm(const AppItem &app);
   void show_activate_confirm(const AppItem &app);
@@ -95,6 +102,8 @@ class AppStorePanel {
   std::vector<AppItem> apps;
   std::string current_category{"all"};
   AppItem pending_app;
+  bool is_visible{false};
+  std::map<std::string, lv_obj_t*> app_res_labels;
 
   // Async task tracking and live progress UI
   std::thread worker_thread;
@@ -115,6 +124,7 @@ class AppStorePanel {
   std::string progress_detail_str;
 
   lv_timer_t *poll_timer{nullptr};
+  lv_timer_t *live_resource_timer{nullptr};
 };
 
 #endif // __APPSTORE_PANEL_H__
