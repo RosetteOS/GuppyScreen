@@ -7,6 +7,9 @@
 #include <algorithm>
 #include <fstream>
 #include <sstream>
+#include <cstdint>
+#include <chrono>
+#include <unistd.h>
 #include <experimental/filesystem>
 
 namespace fs = std::experimental::filesystem;
@@ -76,66 +79,149 @@ static const char *DEFAULT_CATALOG_PATHS[] = {
   nullptr
 };
 
-static void inspect_app_resources(AppItem &app) {
-  if (!app.resource_summary.empty()) return;
+static uint64_t get_system_cpu_jiffies() {
+  std::ifstream f("/proc/stat");
+  if (!f.is_open()) return 0;
+  std::string line;
+  if (std::getline(f, line)) {
+    if (line.rfind("cpu ", 0) == 0) {
+      std::istringstream ss(line.substr(4));
+      uint64_t val = 0, total = 0;
+      while (ss >> val) {
+        total += val;
+      }
+      return total;
+    }
+  }
+  return 0;
+}
 
-  if (app.id == "guppyscreen" && app.is_active) {
-    std::ifstream status_f("/proc/self/status");
-    int rss_kb = 0;
-    std::string s_line;
-    while (std::getline(status_f, s_line)) {
-      if (s_line.rfind("VmRSS:", 0) == 0) {
-        std::sscanf(s_line.c_str(), "VmRSS: %d", &rss_kb);
-        break;
+static uint64_t get_pid_cpu_jiffies(int pid) {
+  if (pid <= 0) return 0;
+  std::ifstream f("/proc/" + std::to_string(pid) + "/stat");
+  if (!f.is_open()) return 0;
+  std::string content;
+  if (std::getline(f, content)) {
+    size_t rparen = content.rfind(')');
+    if (rparen != std::string::npos && rparen + 2 < content.size()) {
+      std::istringstream ss(content.substr(rparen + 2));
+      std::string field;
+      for (int i = 1; i <= 11 && ss >> field; ++i) {}
+      uint64_t utime = 0, stime = 0, cutime = 0, cstime = 0;
+      if (ss >> utime >> stime >> cutime >> cstime) {
+        return utime + stime + cutime + cstime;
       }
     }
-    if (rss_kb > 0) {
-      app.ram_mb = (double)rss_kb / 1024.0;
-      app.ram_str = fmt::format("{:.1f} MB", app.ram_mb);
-      app.resource_summary = fmt::format("RAM: {}", app.ram_str);
-    }
-    return;
+  }
+  return 0;
+}
+
+static int find_running_pid(const AppItem &app) {
+  if (app.id == "guppyscreen" && app.is_active) {
+    return getpid();
   }
 
-  if (app.is_installed && app.has_service && app.service_status == "running") {
+  if (app.is_installed) {
     std::vector<std::string> pid_files = {
       "/var/run/" + app.id + ".pid",
       "/tmp/" + app.id + ".pid",
       "/var/run/" + app.id + "/" + app.id + ".pid"
     };
-    int pid = -1;
     for (const auto &pf : pid_files) {
       if (fs::exists(pf)) {
         try {
           std::ifstream pff(pf);
           int p = -1;
           if (pff >> p && p > 0 && fs::exists("/proc/" + std::to_string(p))) {
-            pid = p;
-            break;
+            return p;
           }
         } catch (...) {}
       }
     }
 
-    if (pid > 0) {
-      app.pid = pid;
-      std::string stat_path = "/proc/" + std::to_string(pid) + "/status";
-      if (fs::exists(stat_path)) {
-        std::ifstream status_f(stat_path);
-        int rss_kb = 0;
-        std::string s_line;
-        while (std::getline(status_f, s_line)) {
-          if (s_line.rfind("VmRSS:", 0) == 0) {
-            std::sscanf(s_line.c_str(), "VmRSS: %d", &rss_kb);
-            break;
+    if (fs::exists("/proc")) {
+      try {
+        for (const auto &entry : fs::directory_iterator("/proc")) {
+          std::string fname = entry.path().filename().string();
+          if (!fname.empty() && std::isdigit(fname[0])) {
+            int p = std::stoi(fname);
+            std::string comm_path = entry.path().string() + "/comm";
+            if (fs::exists(comm_path)) {
+              std::ifstream cf(comm_path);
+              std::string comm;
+              if (cf >> comm && (comm == app.id || comm.find(app.id) != std::string::npos)) {
+                return p;
+              }
+            }
           }
         }
-        if (rss_kb > 0) {
-          app.ram_mb = (double)rss_kb / 1024.0;
-          app.ram_str = fmt::format("{:.1f} MB", app.ram_mb);
-          app.resource_summary = fmt::format("RAM: {}", app.ram_str);
+      } catch (...) {}
+    }
+  }
+
+  return -1;
+}
+
+static void inspect_all_app_resources(std::vector<AppItem> &apps_list) {
+  std::vector<std::pair<size_t, int>> active_pids;
+  for (size_t i = 0; i < apps_list.size(); ++i) {
+    auto &app = apps_list[i];
+    int p = app.pid > 0 && fs::exists("/proc/" + std::to_string(app.pid)) ? app.pid : find_running_pid(app);
+    if (p > 0) {
+      app.pid = p;
+      active_pids.emplace_back(i, p);
+    }
+  }
+
+  if (active_pids.empty()) return;
+
+  uint64_t sys1 = get_system_cpu_jiffies();
+  std::vector<uint64_t> proc1(active_pids.size(), 0);
+  for (size_t i = 0; i < active_pids.size(); ++i) {
+    proc1[i] = get_pid_cpu_jiffies(active_pids[i].second);
+  }
+
+  usleep(60000); // 60ms sampling window
+
+  uint64_t sys2 = get_system_cpu_jiffies();
+  std::vector<uint64_t> proc2(active_pids.size(), 0);
+  for (size_t i = 0; i < active_pids.size(); ++i) {
+    proc2[i] = get_pid_cpu_jiffies(active_pids[i].second);
+  }
+
+  double dsys = sys2 > sys1 ? static_cast<double>(sys2 - sys1) : 1.0;
+  int ncpus = sysconf(_SC_NPROCESSORS_ONLN);
+  if (ncpus < 1) ncpus = 1;
+
+  for (size_t i = 0; i < active_pids.size(); ++i) {
+    size_t app_idx = active_pids[i].first;
+    int pid = active_pids[i].second;
+    auto &app = apps_list[app_idx];
+
+    double dproc = proc2[i] >= proc1[i] ? static_cast<double>(proc2[i] - proc1[i]) : 0.0;
+    double cpu_pct = std::min(100.0 * ncpus, (dproc / dsys) * 100.0 * ncpus);
+    app.cpu_percent = cpu_pct;
+
+    int rss_kb = 0;
+    std::string stat_path = (pid == getpid()) ? "/proc/self/status" : ("/proc/" + std::to_string(pid) + "/status");
+    if (fs::exists(stat_path)) {
+      std::ifstream status_f(stat_path);
+      std::string s_line;
+      while (std::getline(status_f, s_line)) {
+        if (s_line.rfind("VmRSS:", 0) == 0) {
+          std::sscanf(s_line.c_str(), "VmRSS: %d", &rss_kb);
+          break;
         }
       }
+    }
+
+    if (rss_kb > 0) {
+      app.ram_mb = static_cast<double>(rss_kb) / 1024.0;
+      app.ram_str = fmt::format("{:.1f} MB", app.ram_mb);
+    }
+
+    if (app.ram_mb > 0.0 || app.cpu_percent > 0.0) {
+      app.resource_summary = fmt::format("CPU: {:.1f}% | RAM: {:.1f} MB", app.cpu_percent, app.ram_mb);
     }
   }
 }
@@ -329,9 +415,6 @@ void AppStorePanel::refresh_apps() {
           app.ram_mb = item.value("ram_mb", 0.0);
           app.ram_percent = item.value("ram_percent", 0.0);
           app.ram_str = item.value("ram_str", "");
-          app.resource_summary = item.value("resource_summary", "");
-
-          inspect_app_resources(app);
           apps.push_back(app);
         }
         loaded_via_cli = true;
@@ -431,7 +514,6 @@ void AppStorePanel::refresh_apps() {
               app.service_enabled = svc_enabled;
               app.service_status = app.is_installed && app.has_service ? (svc_enabled ? "running" : "stopped") : "";
               app.status = app.is_active ? "active" : (app.is_installed ? "installed" : "available");
-              inspect_app_resources(app);
               apps.push_back(app);
             }
             break;
@@ -442,6 +524,9 @@ void AppStorePanel::refresh_apps() {
       }
     }
   }
+
+  // Sample CPU% and RAM usage across all running apps
+  inspect_all_app_resources(apps);
 
   // Sort: Updates first, then active, then installed, then alphabetical
   std::sort(apps.begin(), apps.end(), [](const AppItem &a, const AppItem &b) {
