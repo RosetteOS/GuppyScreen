@@ -1442,12 +1442,44 @@ void UpdatePanel::execute_update_thread(UpdatePackageItem pkg) {
   if (pkg.is_remote) {
     is_temp_download = true;
     std::string staging_dir = "/usr/data/deploy-staging";
+    // Clean up staging and old temporary downloads to free flash space
     try {
+      if (fs::exists(staging_dir)) {
+        for (const auto &entry : fs::directory_iterator(staging_dir)) {
+          fs::remove_all(entry.path());
+        }
+      }
       fs::create_directories(staging_dir);
+    } catch (...) {}
+
+    // Clean up temporary app/update scratch files
+    try {
+      if (fs::exists("/usr/data/openke/tmp")) {
+        for (const auto &entry : fs::directory_iterator("/usr/data/openke/tmp")) {
+          fs::remove_all(entry.path());
+        }
+      }
     } catch (...) {}
 
     local_swu_path = staging_dir + "/openke-remote-update.swu";
     unlink(local_swu_path.c_str());
+
+    uint64_t expected_total_bytes = pkg.total_size_bytes;
+
+    // Check available flash storage space before starting download
+    if (expected_total_bytes > 0) {
+      try {
+        auto space_info = fs::space("/usr/data");
+        if (space_info.available < expected_total_bytes + (15ULL * 1024 * 1024)) {
+          double avail_mb = static_cast<double>(space_info.available) / (1024.0 * 1024.0);
+          double req_mb = static_cast<double>(expected_total_bytes) / (1024.0 * 1024.0);
+          std::lock_guard<std::mutex> lock(status_mutex);
+          status_message = fmt::format("Insufficient space on /usr/data ({:.1f} MB free, {:.1f} MB required). Please remove unused gcode files.", avail_mb, req_mb);
+          state = UpdateState::FAILED;
+          return;
+        }
+      } catch (...) {}
+    }
 
     {
       std::lock_guard<std::mutex> lock(status_mutex);
@@ -1456,7 +1488,6 @@ void UpdatePanel::execute_update_thread(UpdatePackageItem pkg) {
     }
     progress_percent = 0;
 
-    uint64_t expected_total_bytes = pkg.total_size_bytes;
     std::string header_dump = "/tmp/curl-download-headers.txt";
     unlink(header_dump.c_str());
 
@@ -1547,7 +1578,15 @@ void UpdatePanel::execute_update_thread(UpdatePackageItem pkg) {
       int dl_rc = dl_proc.retcode();
       if (dl_rc != 0 || !fs::exists(local_swu_path) || fs::file_size(local_swu_path) < 1024) {
         std::lock_guard<std::mutex> lock(status_mutex);
-        status_message = "Download failed (curl error " + std::to_string(dl_rc) + "). Check network connection.";
+        if (dl_rc == 23) {
+          status_message = "Download failed: Insufficient flash storage space on /usr/data (curl error 23).";
+        } else if (dl_rc == 28) {
+          status_message = "Download timed out (curl error 28). Check network connection.";
+        } else if (dl_rc == 6 || dl_rc == 7) {
+          status_message = "Could not connect to update server (curl error " + std::to_string(dl_rc) + ").";
+        } else {
+          status_message = "Download failed (curl error " + std::to_string(dl_rc) + "). Check network connection.";
+        }
         state = UpdateState::FAILED;
         unlink(local_swu_path.c_str());
         return;
