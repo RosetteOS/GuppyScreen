@@ -96,60 +96,39 @@ static uint64_t get_system_cpu_jiffies() {
   return 0;
 }
 
-static uint64_t get_pid_cpu_jiffies(int pid) {
-  if (pid <= 0) return 0;
+static uint64_t get_pids_cpu_jiffies(const std::vector<int> &pids) {
   uint64_t total_jiffies = 0;
-
-  // Sum CPU jiffies across all threads in /proc/<pid>/task/
-  std::string task_dir = "/proc/" + std::to_string(pid) + "/task";
-  if (fs::exists(task_dir)) {
-    try {
-      for (const auto &entry : fs::directory_iterator(task_dir)) {
-        std::string tid_stat = entry.path().string() + "/stat";
-        std::ifstream f(tid_stat);
-        if (!f.is_open()) continue;
-        std::string content;
-        if (std::getline(f, content)) {
-          size_t rparen = content.rfind(')');
-          if (rparen != std::string::npos && rparen + 2 < content.size()) {
-            std::istringstream ss(content.substr(rparen + 2));
-            std::string field;
-            for (int i = 1; i <= 11 && ss >> field; ++i) {}
-            uint64_t utime = 0, stime = 0;
-            if (ss >> utime >> stime) {
-              total_jiffies += (utime + stime);
-            }
-          }
+  for (int pid : pids) {
+    if (pid <= 0) continue;
+    std::string stat_path = "/proc/" + std::to_string(pid) + "/stat";
+    std::ifstream f(stat_path);
+    if (!f.is_open()) continue;
+    std::string content;
+    if (std::getline(f, content)) {
+      size_t rparen = content.rfind(')');
+      if (rparen != std::string::npos && rparen + 2 < content.size()) {
+        std::istringstream ss(content.substr(rparen + 2));
+        std::string field;
+        for (int i = 1; i <= 11 && ss >> field; ++i) {}
+        uint64_t utime = 0, stime = 0;
+        if (ss >> utime >> stime) {
+          total_jiffies += (utime + stime);
         }
-      }
-      if (total_jiffies > 0) return total_jiffies;
-    } catch (...) {}
-  }
-
-  std::ifstream f("/proc/" + std::to_string(pid) + "/stat");
-  if (!f.is_open()) return 0;
-  std::string content;
-  if (std::getline(f, content)) {
-    size_t rparen = content.rfind(')');
-    if (rparen != std::string::npos && rparen + 2 < content.size()) {
-      std::istringstream ss(content.substr(rparen + 2));
-      std::string field;
-      for (int i = 1; i <= 11 && ss >> field; ++i) {}
-      uint64_t utime = 0, stime = 0, cutime = 0, cstime = 0;
-      if (ss >> utime >> stime >> cutime >> cstime) {
-        return utime + stime + cutime + cstime;
       }
     }
   }
-  return 0;
+  return total_jiffies;
 }
 
-static int find_running_pid(const AppItem &app) {
+static std::vector<int> find_all_running_pids(const AppItem &app) {
+  std::set<int> pids;
+
   if (app.id == "guppyscreen" && app.is_active) {
-    return getpid();
+    pids.insert(getpid());
   }
 
   if (app.is_installed) {
+    // 1. Check known PID files
     std::vector<std::string> pid_files = {
       "/var/run/" + app.id + ".pid",
       "/tmp/" + app.id + ".pid",
@@ -161,35 +140,71 @@ static int find_running_pid(const AppItem &app) {
           std::ifstream pff(pf);
           int p = -1;
           if (pff >> p && p > 0 && fs::exists("/proc/" + std::to_string(p))) {
-            return p;
+            pids.insert(p);
           }
         } catch (...) {}
       }
     }
 
+    // 2. Scan /proc for comm and cmdline
     if (fs::exists("/proc")) {
       try {
         for (const auto &entry : fs::directory_iterator("/proc")) {
           std::string fname = entry.path().filename().string();
           if (!fname.empty() && std::isdigit(fname[0])) {
             int p = std::stoi(fname);
-            // 1. Check comm
+            // Check comm
             std::string comm_path = entry.path().string() + "/comm";
             if (fs::exists(comm_path)) {
               std::ifstream cf(comm_path);
               std::string comm;
               if (cf >> comm && (comm == app.id || comm.find(app.id) != std::string::npos)) {
-                return p;
+                pids.insert(p);
               }
             }
-            // 2. Check cmdline for Python and script daemons
+            // Check cmdline
             std::string cmd_path = entry.path().string() + "/cmdline";
             if (fs::exists(cmd_path)) {
               std::ifstream cmdf(cmd_path);
               std::string cmd;
               if (std::getline(cmdf, cmd)) {
-                if (cmd.find(app.id) != std::string::npos) {
-                  return p;
+                if (cmd.find(app.id) != std::string::npos || cmd.find("/" + app.id + "/") != std::string::npos) {
+                  pids.insert(p);
+                }
+              }
+            }
+          }
+        }
+      } catch (...) {}
+    }
+
+    // 3. Recursively discover all child / descendant processes
+    if (!pids.empty() && fs::exists("/proc")) {
+      try {
+        bool added = true;
+        while (added) {
+          added = false;
+          for (const auto &entry : fs::directory_iterator("/proc")) {
+            std::string fname = entry.path().filename().string();
+            if (!fname.empty() && std::isdigit(fname[0])) {
+              int p = std::stoi(fname);
+              if (pids.find(p) == pids.end()) {
+                std::string stat_path = entry.path().string() + "/stat";
+                std::ifstream sf(stat_path);
+                std::string content;
+                if (std::getline(sf, content)) {
+                  size_t rparen = content.rfind(')');
+                  if (rparen != std::string::npos && rparen + 2 < content.size()) {
+                    std::istringstream ss(content.substr(rparen + 2));
+                    std::string state;
+                    int ppid = 0;
+                    if (ss >> state >> ppid) {
+                      if (pids.find(ppid) != pids.end()) {
+                        pids.insert(p);
+                        added = true;
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -199,69 +214,137 @@ static int find_running_pid(const AppItem &app) {
     }
   }
 
-  return -1;
+  return std::vector<int>(pids.begin(), pids.end());
 }
 
-static void inspect_all_app_resources(std::vector<AppItem> &apps_list) {
-  std::vector<std::pair<size_t, int>> active_pids;
-  for (size_t i = 0; i < apps_list.size(); ++i) {
-    auto &app = apps_list[i];
-    int p = app.pid > 0 && fs::exists("/proc/" + std::to_string(app.pid)) ? app.pid : find_running_pid(app);
-    if (p > 0) {
-      app.pid = p;
-      active_pids.emplace_back(i, p);
-    }
-  }
-
-  if (active_pids.empty()) return;
-
-  uint64_t sys1 = get_system_cpu_jiffies();
-  std::vector<uint64_t> proc1(active_pids.size(), 0);
-  for (size_t i = 0; i < active_pids.size(); ++i) {
-    proc1[i] = get_pid_cpu_jiffies(active_pids[i].second);
-  }
-
-  usleep(150000); // 150ms sampling window for accurate tick resolution on 100Hz kernel
-
-  uint64_t sys2 = get_system_cpu_jiffies();
-  std::vector<uint64_t> proc2(active_pids.size(), 0);
-  for (size_t i = 0; i < active_pids.size(); ++i) {
-    proc2[i] = get_pid_cpu_jiffies(active_pids[i].second);
-  }
-
-  double dsys = sys2 > sys1 ? static_cast<double>(sys2 - sys1) : 1.0;
-  int ncpus = sysconf(_SC_NPROCESSORS_ONLN);
-  if (ncpus < 1) ncpus = 1;
-
-  for (size_t i = 0; i < active_pids.size(); ++i) {
-    size_t app_idx = active_pids[i].first;
-    int pid = active_pids[i].second;
-    auto &app = apps_list[app_idx];
-
-    double dproc = proc2[i] >= proc1[i] ? static_cast<double>(proc2[i] - proc1[i]) : 0.0;
-    double cpu_pct = std::min(100.0 * ncpus, (dproc / dsys) * 100.0 * ncpus);
-    app.cpu_percent = cpu_pct;
-
-    int rss_kb = 0;
+static int get_pids_rss_kb(const std::vector<int> &pids) {
+  int total_rss_kb = 0;
+  for (int pid : pids) {
+    if (pid <= 0) continue;
     std::string stat_path = (pid == getpid()) ? "/proc/self/status" : ("/proc/" + std::to_string(pid) + "/status");
     if (fs::exists(stat_path)) {
       std::ifstream status_f(stat_path);
       std::string s_line;
       while (std::getline(status_f, s_line)) {
         if (s_line.rfind("VmRSS:", 0) == 0) {
-          std::sscanf(s_line.c_str(), "VmRSS: %d", &rss_kb);
+          int rss_kb = 0;
+          if (std::sscanf(s_line.c_str(), "VmRSS: %d", &rss_kb) == 1) {
+            total_rss_kb += rss_kb;
+          }
           break;
         }
       }
     }
+  }
+  return total_rss_kb;
+}
 
-    if (rss_kb > 0) {
-      app.ram_mb = static_cast<double>(rss_kb) / 1024.0;
-      app.ram_str = fmt::format("{:.1f} MB", app.ram_mb);
+struct AppCpuHistory {
+  uint64_t last_proc_jiffies{0};
+  uint64_t last_sys_jiffies{0};
+  std::chrono::steady_clock::time_point last_sample_time{};
+  double smoothed_cpu{0.0};
+};
+static std::map<std::string, AppCpuHistory> g_app_cpu_history;
+
+static void inspect_all_app_resources(std::vector<AppItem> &apps_list) {
+  std::vector<std::pair<size_t, std::vector<int>>> active_apps;
+  for (size_t i = 0; i < apps_list.size(); ++i) {
+    auto &app = apps_list[i];
+    std::vector<int> pids = find_all_running_pids(app);
+    if (!pids.empty()) {
+      app.pid = pids[0];
+      active_apps.emplace_back(i, pids);
+    }
+  }
+
+  if (active_apps.empty()) return;
+
+  auto now = std::chrono::steady_clock::now();
+  int ncpus = sysconf(_SC_NPROCESSORS_ONLN);
+  if (ncpus < 1) ncpus = 1;
+
+  bool need_immediate_sample = false;
+  for (const auto &item : active_apps) {
+    const std::string &app_id = apps_list[item.first].id;
+    auto it = g_app_cpu_history.find(app_id);
+    if (it == g_app_cpu_history.end()) {
+      need_immediate_sample = true;
+      break;
+    }
+    auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - it->second.last_sample_time).count();
+    if (elapsed_ms < 300 || elapsed_ms > 15000) {
+      need_immediate_sample = true;
+      break;
+    }
+  }
+
+  if (need_immediate_sample) {
+    uint64_t sys1 = get_system_cpu_jiffies();
+    std::vector<uint64_t> proc1(active_apps.size(), 0);
+    for (size_t i = 0; i < active_apps.size(); ++i) {
+      proc1[i] = get_pids_cpu_jiffies(active_apps[i].second);
     }
 
-    if (app.ram_mb > 0.0 || app.cpu_percent > 0.0) {
-      app.resource_summary = fmt::format("CPU: {:.1f}% | RAM: {:.1f} MB", app.cpu_percent, app.ram_mb);
+    usleep(250000); // 250ms sample window
+
+    uint64_t sys2 = get_system_cpu_jiffies();
+    std::vector<uint64_t> proc2(active_apps.size(), 0);
+    for (size_t i = 0; i < active_apps.size(); ++i) {
+      proc2[i] = get_pids_cpu_jiffies(active_apps[i].second);
+    }
+
+    double dsys = sys2 > sys1 ? static_cast<double>(sys2 - sys1) : 1.0;
+    now = std::chrono::steady_clock::now();
+
+    for (size_t i = 0; i < active_apps.size(); ++i) {
+      size_t app_idx = active_apps[i].first;
+      auto &app = apps_list[app_idx];
+      double dproc = proc2[i] >= proc1[i] ? static_cast<double>(proc2[i] - proc1[i]) : 0.0;
+      double instant_cpu = std::min(100.0 * ncpus, (dproc / dsys) * 100.0 * ncpus);
+
+      auto &hist = g_app_cpu_history[app.id];
+      hist.last_proc_jiffies = proc2[i];
+      hist.last_sys_jiffies = sys2;
+      hist.last_sample_time = now;
+      hist.smoothed_cpu = instant_cpu;
+      app.cpu_percent = instant_cpu;
+
+      int rss_kb = get_pids_rss_kb(active_apps[i].second);
+      if (rss_kb > 0) {
+        app.ram_mb = static_cast<double>(rss_kb) / 1024.0;
+        app.ram_str = fmt::format("{:.1f} MB", app.ram_mb);
+      }
+      if (app.ram_mb > 0.0 || app.cpu_percent > 0.0 || app.is_active || (app.is_installed && app.service_status == "running")) {
+        app.resource_summary = fmt::format("CPU: {:.1f}% | RAM: {:.1f} MB", app.cpu_percent, app.ram_mb);
+      }
+    }
+  } else {
+    uint64_t sys_now = get_system_cpu_jiffies();
+    for (size_t i = 0; i < active_apps.size(); ++i) {
+      size_t app_idx = active_apps[i].first;
+      auto &app = apps_list[app_idx];
+      uint64_t proc_now = get_pids_cpu_jiffies(active_apps[i].second);
+
+      auto &hist = g_app_cpu_history[app.id];
+      double dsys = sys_now > hist.last_sys_jiffies ? static_cast<double>(sys_now - hist.last_sys_jiffies) : 1.0;
+      double dproc = proc_now >= hist.last_proc_jiffies ? static_cast<double>(proc_now - hist.last_proc_jiffies) : 0.0;
+      double instant_cpu = std::min(100.0 * ncpus, (dproc / dsys) * 100.0 * ncpus);
+
+      hist.smoothed_cpu = 0.6 * instant_cpu + 0.4 * hist.smoothed_cpu;
+      hist.last_proc_jiffies = proc_now;
+      hist.last_sys_jiffies = sys_now;
+      hist.last_sample_time = now;
+      app.cpu_percent = hist.smoothed_cpu;
+
+      int rss_kb = get_pids_rss_kb(active_apps[i].second);
+      if (rss_kb > 0) {
+        app.ram_mb = static_cast<double>(rss_kb) / 1024.0;
+        app.ram_str = fmt::format("{:.1f} MB", app.ram_mb);
+      }
+      if (app.ram_mb > 0.0 || app.cpu_percent > 0.0 || app.is_active || (app.is_installed && app.service_status == "running")) {
+        app.resource_summary = fmt::format("CPU: {:.1f}% | RAM: {:.1f} MB", app.cpu_percent, app.ram_mb);
+      }
     }
   }
 }
@@ -455,6 +538,10 @@ void AppStorePanel::refresh_apps() {
           app.ram_mb = item.value("ram_mb", 0.0);
           app.ram_percent = item.value("ram_percent", 0.0);
           app.ram_str = item.value("ram_str", "");
+          app.resource_summary = item.value("resource_summary", "");
+          if (app.resource_summary.empty() && (app.ram_mb > 0.0 || app.cpu_percent > 0.0 || app.is_active || (app.is_installed && app.service_status == "running"))) {
+            app.resource_summary = fmt::format("CPU: {:.1f}% | RAM: {:.1f} MB", app.cpu_percent, app.ram_mb);
+          }
           apps.push_back(app);
         }
         loaded_via_cli = true;
@@ -563,10 +650,10 @@ void AppStorePanel::refresh_apps() {
         }
       }
     }
-  }
 
-  // Sample CPU% and RAM usage across all running apps
-  inspect_all_app_resources(apps);
+    // Sample CPU% and RAM usage across all running apps when running in fallback mode
+    inspect_all_app_resources(apps);
+  }
 
   // Sort: Updates first, then active, then installed, then alphabetical
   std::sort(apps.begin(), apps.end(), [](const AppItem &a, const AppItem &b) {
