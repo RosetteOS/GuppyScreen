@@ -1481,17 +1481,17 @@ void AppStorePanel::parse_appstore_output_line(const std::string &line) {
     std::lock_guard<std::mutex> lock(progress_mutex);
     progress_stage_str = "Configuring system services...";
     progress_detail_str = "Registering components";
-  } else if (line.find("Starting") != std::string::npos || line.find("Stopping") != std::string::npos || line.find("Enabling") != std::string::npos || line.find("Disabling") != std::string::npos) {
-    progress_percent.store(50);
-    std::lock_guard<std::mutex> lock(progress_mutex);
-    progress_stage_str = line;
-    progress_detail_str = "Managing service";
   } else if (line.find("Successfully installed") != std::string::npos ||
              (line.find("OK") != std::string::npos && (line.find("service") != std::string::npos || line.find("Started") != std::string::npos || line.find("Stopped") != std::string::npos || line.find("Enabled") != std::string::npos || line.find("Disabled") != std::string::npos))) {
     progress_percent.store(100);
     std::lock_guard<std::mutex> lock(progress_mutex);
     progress_stage_str = "Service operation complete!";
     progress_detail_str = "Done";
+  } else if (line.find("Starting") != std::string::npos || line.find("Stopping") != std::string::npos || line.find("Enabling") != std::string::npos || line.find("Disabling") != std::string::npos) {
+    progress_percent.store(50);
+    std::lock_guard<std::mutex> lock(progress_mutex);
+    progress_stage_str = line;
+    progress_detail_str = "Managing service";
   }
 }
 
@@ -1504,37 +1504,42 @@ void AppStorePanel::stream_process_output(const std::string &cmd, const std::str
   }
   progress_percent.store(0);
 
-  FILE *pipe = popen((cmd + " 2>&1").c_str(), "r");
-  if (!pipe) {
-    task_exit_code.store(1);
-    task_error_msg = "Failed to launch openke-app process.";
-    return;
-  }
-
-  std::string line;
-  std::string last_output_line;
-  int c;
-  while ((c = fgetc(pipe)) != EOF) {
-    if (c == '\r' || c == '\n') {
-      if (!line.empty()) {
-        last_output_line = line;
-        parse_appstore_output_line(line);
-        line.clear();
-      }
-    } else {
-      line += static_cast<char>(c);
+  try {
+    auto proc = sp::Popen(cmd + " 2>&1", sp::shell{true}, sp::output{sp::PIPE});
+    FILE *pipe = proc.output();
+    if (!pipe) {
+      task_exit_code.store(1);
+      task_error_msg = "Failed to launch openke-app process.";
+      return;
     }
-  }
-  if (!line.empty()) {
-    last_output_line = line;
-    parse_appstore_output_line(line);
-  }
 
-  int status = pclose(pipe);
-  int exit_code = WIFEXITED(status) ? WEXITSTATUS(status) : 1;
-  task_exit_code.store(exit_code);
-  if (exit_code != 0 && task_error_msg.empty() && !last_output_line.empty()) {
-    task_error_msg = last_output_line;
+    std::string line;
+    std::string last_output_line;
+    int c;
+    while ((c = fgetc(pipe)) != EOF) {
+      if (c == '\r' || c == '\n') {
+        if (!line.empty()) {
+          last_output_line = line;
+          parse_appstore_output_line(line);
+          line.clear();
+        }
+      } else {
+        line += static_cast<char>(c);
+      }
+    }
+    if (!line.empty()) {
+      last_output_line = line;
+      parse_appstore_output_line(line);
+    }
+
+    int exit_code = proc.wait();
+    task_exit_code.store(exit_code);
+    if (exit_code != 0 && task_error_msg.empty() && !last_output_line.empty()) {
+      task_error_msg = last_output_line;
+    }
+  } catch (const std::exception &e) {
+    task_exit_code.store(1);
+    task_error_msg = std::string("Execution error: ") + e.what();
   }
 }
 
