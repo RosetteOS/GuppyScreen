@@ -8,6 +8,8 @@
 #include <fstream>
 #include <sstream>
 #include <cstdint>
+#include <cstdio>
+#include <cstring>
 #include <chrono>
 #include <set>
 #include <unistd.h>
@@ -28,13 +30,25 @@ LV_IMG_DECLARE(print);
 
 // Per-app logo downloaded by `openke-app update/install` (64x64 PNG). Returns an LVGL
 // "A:" file path, or empty when no logo has been fetched yet (built-in glyph is used).
+// Only 28x28 PNGs are accepted (older 64x64 downloads are ignored until refreshed).
+static bool app_icon_valid(const std::string &path) {
+  FILE *f = fopen(path.c_str(), "rb");
+  if (!f) return false;
+  unsigned char hdr[24] = {0};
+  size_t n = fread(hdr, 1, sizeof(hdr), f);
+  fclose(f);
+  if (n < sizeof(hdr) || memcmp(hdr, "\x89PNG", 4) != 0) return false;
+  unsigned w = (hdr[16] << 24) | (hdr[17] << 16) | (hdr[18] << 8) | hdr[19];
+  unsigned h = (hdr[20] << 24) | (hdr[21] << 16) | (hdr[22] << 8) | hdr[23];
+  return w == 28 && h == 28;
+}
+
 static std::string get_app_icon_file(const AppItem &app) {
   if (app.id.empty() || app.id.find('/') != std::string::npos || app.id.find("..") != std::string::npos) {
     return "";
   }
   const std::string path = "/usr/data/openke/icons/" + app.id + ".png";
-  std::error_code ec;
-  if (fs::exists(path, ec) && fs::file_size(path, ec) > 0) {
+  if (app_icon_valid(path)) {
     return "A:" + path;
   }
   return "";
@@ -465,8 +479,7 @@ void AppStorePanel::foreground() {
 
   // First open after install/upgrade: pull the catalog (and with it the app logos) once.
   static bool icons_requested = false;
-  std::error_code ec;
-  if (!icons_requested && !fs::exists("/usr/data/openke/icons", ec)) {
+  if (!icons_requested && !app_icon_valid("/usr/data/openke/icons/mainsail.png")) {
     icons_requested = true;
     execute_refresh();
   }
@@ -799,12 +812,9 @@ void AppStorePanel::build_app_list() {
     lv_obj_t *icon_img = lv_img_create(icon_cont);
     const std::string icon_file = get_app_icon_file(app);
     if (!icon_file.empty()) {
-      // App-supplied 64x64 logo: drop the themed backdrop and scale to the 28px content box
+      // App-supplied 28x28 logo: drop the themed backdrop, draw at native size
       lv_obj_set_style_bg_opa(icon_cont, LV_OPA_TRANSP, 0);
       lv_img_set_src(icon_img, icon_file.c_str());
-      lv_img_set_size_mode(icon_img, LV_IMG_SIZE_MODE_REAL);
-      lv_img_set_pivot(icon_img, 0, 0);
-      lv_img_set_zoom(icon_img, 256 * 28 / 64);
     } else {
       lv_img_set_src(icon_img, get_app_icon(app));
     }
