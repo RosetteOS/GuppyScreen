@@ -26,6 +26,20 @@ LV_IMG_DECLARE(fine_tune_img);
 LV_IMG_DECLARE(power_devices_img);
 LV_IMG_DECLARE(print);
 
+// Per-app logo downloaded by `openke-app update/install` (64x64 PNG). Returns an LVGL
+// "A:" file path, or empty when no logo has been fetched yet (built-in glyph is used).
+static std::string get_app_icon_file(const AppItem &app) {
+  if (app.id.empty() || app.id.find('/') != std::string::npos || app.id.find("..") != std::string::npos) {
+    return "";
+  }
+  const std::string path = "/usr/data/openke/icons/" + app.id + ".png";
+  std::error_code ec;
+  if (fs::exists(path, ec) && fs::file_size(path, ec) > 0) {
+    return "A:" + path;
+  }
+  return "";
+}
+
 static const void *get_app_icon(const AppItem &app) {
   const std::string &icon = app.icon;
   const std::string &id = app.id;
@@ -448,6 +462,14 @@ void AppStorePanel::foreground() {
   refresh_apps();
   build_app_list();
   lv_obj_move_foreground(cont);
+
+  // First open after install/upgrade: pull the catalog (and with it the app logos) once.
+  static bool icons_requested = false;
+  std::error_code ec;
+  if (!icons_requested && !fs::exists("/usr/data/openke/icons", ec)) {
+    icons_requested = true;
+    execute_refresh();
+  }
 }
 
 void AppStorePanel::background() {
@@ -775,7 +797,17 @@ void AppStorePanel::build_app_list() {
     lv_obj_clear_flag(icon_cont, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t *icon_img = lv_img_create(icon_cont);
-    lv_img_set_src(icon_img, get_app_icon(app));
+    const std::string icon_file = get_app_icon_file(app);
+    if (!icon_file.empty()) {
+      // App-supplied 64x64 logo: drop the themed backdrop and scale to the 28px content box
+      lv_obj_set_style_bg_opa(icon_cont, LV_OPA_TRANSP, 0);
+      lv_img_set_src(icon_img, icon_file.c_str());
+      lv_img_set_size_mode(icon_img, LV_IMG_SIZE_MODE_REAL);
+      lv_img_set_pivot(icon_img, 0, 0);
+      lv_img_set_zoom(icon_img, 256 * 28 / 64);
+    } else {
+      lv_img_set_src(icon_img, get_app_icon(app));
+    }
     lv_obj_center(icon_img);
 
     // Title label
