@@ -2,7 +2,7 @@
 
 Do your prints come out as a slight **parallelogram** instead of a true square? A box whose lid won't sit
 square, holes that look a touch oval, a 100 mm part that measures 100 mm on each side but isn't quite
-*square*? That's **skew** — and OpenKE can correct it entirely from the printer's screen.
+*square*? That's **skew** — and RosetteOS can correct it entirely from the printer's screen.
 
 You don't need a computer or a slicer for this. Print one test frame from the screen, measure it with
 calipers, type in three numbers, and you're done.
@@ -42,7 +42,7 @@ measures the error from a test print and shears every move by the opposite amoun
   it isn't a screen button — it's one console command (`SET_SKEW CLEAR=1`, see
   [Undoing / clearing it](#undoing--clearing-it) below) — but it is quick and fully reversible.
 
-> **Requirement:** your printer needs the `[skew_correction]` section enabled. The OpenKE installer adds
+> **Requirement:** your printer needs the `[skew_correction]` section enabled. The RosetteOS installer adds
 > it for you (under the print-quality mods prompt). The **Skew** button always looks the same — if the
 > section isn't enabled, tapping it pops up a message for a few seconds: *"Skew correction isn't
 > enabled. Add [skew_correction] to printer.cfg."* If you see that, see
@@ -134,7 +134,7 @@ That zeroes the correction. Re-running Steps 1–3 overwrites it with fresh meas
 
 ## Enabling it
 
-The OpenKE installer enables this for you (it ships a `[skew_correction]` section). If tapping
+The RosetteOS installer enables this for you (it ships a `[skew_correction]` section). If tapping
 **Tune → Skew** pops up *"Skew correction isn't enabled"*, the quickest fix is to **re-run the [installer](Installation)**
 and answer **Y** at the print-quality-mods prompt, then **Restart Klipper** (if it shuts down with a
 `serialqueue` error, restart once more — see [Troubleshooting](Troubleshooting)).

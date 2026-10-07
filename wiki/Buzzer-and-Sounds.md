@@ -1,7 +1,7 @@
 # Beeps & Songs (the Buzzer)
 
 Your Ender-3 V3 KE has a small buzzer on the board. Stock firmware only ever used it for one fixed,
-loud beep. OpenKE drives it with **hardware PWM** instead, so it can play **any pitch, any length, and
+loud beep. RosetteOS drives it with **hardware PWM** instead, so it can play **any pitch, any length, and
 full melodies** — and it does so with **zero CPU load**, which means it's safe even in the middle of a
 print.
 
@@ -11,11 +11,11 @@ There are three things this gives you:
 2. **`M300` beeps** with real pitch and duration (the standard slicer "beep" command).
 3. **`PLAY_TUNE` songs** — built-in tunes, plus your own, kept in an editable file.
 
-> **Upgraded from before `v1.1.0-OpenKE` and don't see `M300`/`PLAY_TUNE`?** These commands and the
+> **Upgraded from before `v1.1.0-RosetteOS` and don't see `M300`/`PLAY_TUNE`?** These commands and the
 > default song list install into your Klipper config, which the on-screen **Update Guppy** button doesn't
 > touch — so **re-run the [installer](Installation)** once (safe, keeps your config) and they'll appear.
 > This is a one-time step only for that upgrade; **fresh installs already have everything**, and from
-> `v1.1.0-OpenKE` onward it's automatic. See [Upgrading](Upgrading) for details.
+> `v1.1.0-RosetteOS` onward it's automatic. See [Upgrading](Upgrading) for details.
 
 ---
 
@@ -87,7 +87,7 @@ recompiling, no reflashing.
 
 Two things worth knowing:
 
-- **Your songs survive updates.** Reinstalling or updating OpenKE only creates `songs.conf` if it's
+- **Your songs survive updates.** Reinstalling or updating RosetteOS only creates `songs.conf` if it's
   missing — it never overwrites the one you've edited.
 - **Use normal `#` sharps here.** In `songs.conf` you can paste RTTTL exactly as found online
   (`a#`, `f#`, …). The buzzer player reads this file directly, so the sharps come through fine.

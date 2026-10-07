@@ -1,4 +1,4 @@
-// Offline, host-native unit test for OpenKE AppStore catalog parsing and data structures
+// Offline, host-native unit test for RosetteOS AppStore catalog parsing and data structures
 #include "minitest.h"
 #include "hv/json.hpp"
 #include <fstream>
@@ -30,24 +30,8 @@ struct TestAppItem {
 };
 
 TEST(AppStoreCatalog, parses_manifest_json_correctly) {
-  const char *manifest_paths[] = {
-    "../manifests/apps.json",
-    "../../OpenKE/manifests/apps.json",
-    "/root/Development/OpenKE/OpenKE/manifests/apps.json"
-  };
-
-  std::string found_path = "";
-  for (const auto *p : manifest_paths) {
-    std::ifstream check(p);
-    if (check.good()) {
-      found_path = p;
-      break;
-    }
-  }
-
-  ASSERT_TRUE(!found_path.empty());
-
-  std::ifstream f(found_path);
+  std::ifstream f("../RosetteOS/manifests/apps.json");
+  ASSERT_TRUE(f.good());
   json data;
   f >> data;
 
@@ -87,7 +71,7 @@ TEST(AppStoreCatalog, category_filtering_and_sorting) {
   std::vector<TestAppItem> apps = {
     {"mainsail", "Mainsail", "web_ui", "2.12.0", "Mainsail Crew", "", true, true, true, false, "", "active", -1, 0.0, 0.0, 0.0, "", ""},
     {"fluidd", "Fluidd", "web_ui", "1.30.0", "Fluidd Team", "", false, false, false, false, "", "available", -1, 0.0, 0.0, 0.0, "", ""},
-    {"guppyscreen", "GuppyScreen", "touch_ui", "1.0.0", "OpenKE", "", true, true, true, false, "", "active", -1, 0.0, 0.0, 0.0, "", ""},
+    {"guppyscreen", "GuppyScreen", "touch_ui", "1.0.0", "RosetteOS", "", true, true, true, false, "", "active", -1, 0.0, 0.0, 0.0, "", ""},
     {"helixscreen", "HelixScreen", "touch_ui", "0.5.0", "Helix", "", false, true, false, false, "", "installed", -1, 0.0, 0.0, 0.0, "", ""},
     {"spoolman", "Spoolman", "plugin", "0.20.0", "Donkie", "", false, false, false, true, "stopped", "available", -1, 0.0, 0.0, 0.0, "", ""}
   };

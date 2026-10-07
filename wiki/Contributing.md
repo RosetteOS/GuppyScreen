@@ -37,12 +37,12 @@ This project builds on the work of:
 - [Guilouz/Creality-Helper-Script](https://github.com/Guilouz/Creality-Helper-Script) — the
   `useful-macros.cfg`/`M600-support.cfg`/`save-zoffset.cfg` templates are modeled on theirs. Moonraker
   and Nginx were originally fetched from their repo at install time too, but are now vendored directly
-  by OpenKE instead (a real clone of the official upstream Moonraker, and a from-source rebuild of
+  by RosetteOS instead (a real clone of the official upstream Moonraker, and a from-source rebuild of
   nginx — no longer install-time-dependent on that repo staying online). As of this vendoring, the
   installer has no remaining runtime dependency on Guilouz's repo for anything.
 - [kyleisah/Klipper-Adaptive-Meshing-Purging](https://github.com/kyleisah/Klipper-Adaptive-Meshing-Purging) —
   `Smart_Park.cfg`/`Line_Purge.cfg` are still adapted from KAMP (GPL-3.0); the adaptive-mesh macro itself
-  is now original OpenKE code delegating to Klipper's own native adaptive meshing, no longer vendored KAMP
+  is now original RosetteOS code delegating to Klipper's own native adaptive meshing, no longer vendored KAMP
 - [Klipper3d/klipper](https://github.com/Klipper3d/klipper) — Axis Twist Compensation and Screws Tilt
   Adjust modules, vendored verbatim from `klippy/extras/` (the KE's stock Klipper build predates/strips
   both; Skew Correction uses Klipper's native `[skew_correction]` directly, no vendored file needed)

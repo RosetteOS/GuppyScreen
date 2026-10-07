@@ -105,9 +105,9 @@ GuppyScreen *GuppyScreen::init(std::function<void(lv_color_t, lv_color_t)> hal_i
     KUtils::set_wifi_low_latency(true);
   }
 
-#ifdef OPENKE_VERSION
-  spdlog::info("OpenKE Version: {}", OPENKE_VERSION);
-#endif  // OPENKE_VERSION
+#ifdef ROSETTEOS_VERSION
+  spdlog::info("RosetteOS Version: {}", ROSETTEOS_VERSION);
+#endif  // ROSETTEOS_VERSION
 
   spdlog::info("DPI: {}", LV_DPI_DEF);
   /*LittlevGL init*/

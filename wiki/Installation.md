@@ -9,7 +9,7 @@
 > before you start if you don't already have a mount.
 >
 > 🖨️ **Alternative mount:** if you'd rather keep the screen closer to its original stock position,
-> **@DylanUnofficial** built **[Nebula screen mount](https://www.printables.com/model/1770386-creality-ender-3-v3-ke-openke-nebula-screen-mount)**
+> **@DylanUnofficial** built **[Nebula screen mount](https://www.printables.com/model/1770386-creality-ender-3-v3-ke-rosetteos-nebula-screen-mount)**
 > on Printables. Thanks Dylan!
 
 ## Install
@@ -57,7 +57,7 @@ printing "Creality services are already disabled — leaving them that way" inst
 - **`y` (recommended)** — frees up CPU/RAM for the things that matter (Klipper, Moonraker, the screen) by
   not starting Creality's cloud/app stack. This is what most KE users want.
 - **`n`** — keeps Creality's services, but the installer still moves `Monitor` and `display-server` aside
-  (renamed to `.disable`) so OpenKE can own the screen. The trade-off with `y` is that the Creality
+  (renamed to `.disable`) so RosetteOS can own the screen. The trade-off with `y` is that the Creality
   Cloud / Creality Print app integration stops working.
 
 It's reversible either way — backups go to `/usr/data/guppyify-backup/`, and the uninstaller (plus the
@@ -68,7 +68,7 @@ notes it prints) restore the originals.
 Near the end the installer asks:
 
 ```
-=== OpenKE optional features ===
+=== RosetteOS optional features ===
   [Y] install all     [n] skip all     [o] choose each one
 Choice (Y/n/o):
 ```
@@ -104,7 +104,7 @@ What's on offer:
 > config may already own (`[save_variables]`, `[filament_switch_sensor filament_sensor]`,
 > `SET_GCODE_OFFSET`, `[idle_timeout]`, the backup/restore/reload-camera macros, extruder
 > `rotation_distance` helpers). To avoid a duplicate-section crash, the installer checks first — if none
-> of those sections exist yet, you get OpenKE's own versions outright. If they're already defined
+> of those sections exist yet, you get RosetteOS's own versions outright. If they're already defined
 > elsewhere (e.g. an existing Helper-Script setup), it **offers to safely replace them**: it checks
 > whether the existing sections are read *anywhere else in your active config* — not just the same
 > file, since a real setup can easily have a macro's definition in one `[include]`d file and whatever
@@ -112,12 +112,12 @@ What's on offer:
 > another macro's body, not just a `printer[...]` lookup. If any reference turns up, it's a sign of a
 > genuinely working, self-contained setup, not a stray duplicate, and it leaves everything untouched;
 > otherwise, with your confirmation, it backs up the old file, comments out just the conflicting sections,
-> and installs OpenKE's version in their place. Say no to the prompt (or it detects a working setup) and
+> and installs RosetteOS's version in their place. Say no to the prompt (or it detects a working setup) and
 > your existing macros keep running exactly as they were. Exclude Object also flips
 > `enable_object_processing` on in `moonraker.conf` when safe — including inserting it under an existing
 > `[file_manager]` section, not just when that section is missing entirely.
 >
-> **Moonraker and Nginx are vendored by OpenKE directly** (a real clone of the official upstream
+> **Moonraker and Nginx are vendored by RosetteOS directly** (a real clone of the official upstream
 > Moonraker, and the same nginx binary the community K1/KE lineage has used for a while) — the installer
 > no longer fetches either from the Creality Helper Script's repo at install time. Mainsail is also
 > registered with Moonraker's `update_manager` automatically, so it shows up in Mainsail's own "Machine
@@ -131,11 +131,11 @@ What's on offer:
 
 **Coexists with the Creality Helper Script.** If you already set any of these up — by hand or via the
 Helper Script — the installer **detects it** and, for M600/Save Z-Offset/useful macros/E-Steps
-Calibration specifically, **offers to safely swap in OpenKE's own version** (see above) rather than just
+Calibration specifically, **offers to safely swap in RosetteOS's own version** (see above) rather than just
 leaving the old one in place forever; everything else it skips adding a config section you already have
 (no duplicate-section crash), and it backs up any Klipper-extras module it overwrites (e.g. an existing
 TMC Autotune) to `/usr/data/guppyify-backup/` first. The everyday macros — `M600`/filament, Save
-Z-Offset, useful macros, E-Steps Calibration, `[exclude_object]` — are now **shipped by OpenKE** (the
+Z-Offset, useful macros, E-Steps Calibration, `[exclude_object]` — are now **shipped by RosetteOS** (the
 **Creality macros** and **E-Steps Calibration** options), so a fresh printer gets them outright; on a
 printer that already has them (e.g. an existing Helper-Script setup), M600, Save Z-Offset, useful
 macros, and E-Steps Calibration offer the safe-replace prompt, Exclude Object is skipped. Either way
@@ -161,7 +161,7 @@ yes at the prompt.
 
 ¹ The KE's stock `S50dropbear` has its `start` call commented out, so SSH does not auto-start on a
 clean reboot. The replacement fixes this — SSH will auto-start after install. This one is
-**permanent by design**: even uninstalling OpenKE does not put the stock version back, because the
+**permanent by design**: even uninstalling RosetteOS does not put the stock version back, because the
 stock version has a separate startup race with the Creality display service that can leave SSH
 unreachable — exactly when you'd most want remote access. See
 [Resetting & Uninstalling](Resetting-and-Uninstalling).
@@ -178,7 +178,7 @@ un-calibrate your printer. The probe-patch backup (`probe.py.bak`) and the times
 backups give you a restore point regardless.
 
 > The one thing that *does* wipe calibrations is a **Creality firmware update** (it can reset
-> `printer.cfg` and erase Klipper-side files) — that's true of any Klipper mod, not OpenKE specifically.
+> `printer.cfg` and erase Klipper-side files) — that's true of any Klipper mod, not RosetteOS specifically.
 > After a firmware update, re-run the installer and re-run the affected calibrations.
 
 ## Testing bleeding-edge builds (`ke-next` nightly)

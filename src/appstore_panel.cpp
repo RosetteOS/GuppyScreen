@@ -28,7 +28,7 @@ LV_IMG_DECLARE(fine_tune_img);
 LV_IMG_DECLARE(power_devices_img);
 LV_IMG_DECLARE(print);
 
-// Per-app logo downloaded by `openke-app update/install` (64x64 PNG). Returns an LVGL
+// Per-app logo downloaded by `rosetteos-app update/install` (64x64 PNG). Returns an LVGL
 // "A:" file path, or empty when no logo has been fetched yet (built-in glyph is used).
 // Only 28x28 PNGs are accepted (older 64x64 downloads are ignored until refreshed).
 static bool app_icon_valid(const std::string &path) {
@@ -47,7 +47,7 @@ static std::string get_app_icon_file(const AppItem &app) {
   if (app.id.empty() || app.id.find('/') != std::string::npos || app.id.find("..") != std::string::npos) {
     return "";
   }
-  const std::string path = "/usr/data/openke/icons/" + app.id + ".png";
+  const std::string path = "/usr/data/rosetteos/icons/" + app.id + ".png";
   if (app_icon_valid(path)) {
     return "A:" + path;
   }
@@ -99,12 +99,12 @@ static const void *get_app_icon(const AppItem &app) {
 }
 
 static const char *DEFAULT_CATALOG_PATHS[] = {
-  "/usr/data/openke/apps.json",
-  "/usr/data/openke-seeds/apps.json",
-  "/opt/openke-seeds/apps.json",
-  "/opt/openke/apps.json",
-  "/etc/openke/apps.json",
-  "/etc/openke-apps.json",
+  "/usr/data/rosetteos/apps.json",
+  "/usr/data/rosetteos-seeds/apps.json",
+  "/opt/rosetteos-seeds/apps.json",
+  "/opt/rosetteos/apps.json",
+  "/etc/rosetteos/apps.json",
+  "/etc/rosetteos-apps.json",
   nullptr
 };
 
@@ -420,7 +420,7 @@ AppStorePanel::AppStorePanel(KWebSocketClient &c)
   lv_obj_set_style_border_color(top_bar, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
   lv_obj_set_style_bg_opa(top_bar, LV_OPA_TRANSP, 0);
 
-  lv_label_set_text(title_label, "OpenKE App Store");
+  lv_label_set_text(title_label, "RosetteOS App Store");
   lv_obj_set_style_text_font(title_label, &lv_font_montserrat_16, 0);
   lv_obj_align(title_label, LV_ALIGN_LEFT_MID, 10, 0);
   lv_obj_align(refresh_btn.get_container(), LV_ALIGN_RIGHT_MID, -70, 0);
@@ -479,7 +479,7 @@ void AppStorePanel::foreground() {
 
   // First open after install/upgrade: pull the catalog (and with it the app logos) once.
   static bool icons_requested = false;
-  if (!icons_requested && !app_icon_valid("/usr/data/openke/icons/mainsail.png")) {
+  if (!icons_requested && !app_icon_valid("/usr/data/rosetteos/icons/mainsail.png")) {
     icons_requested = true;
     execute_refresh();
   }
@@ -562,10 +562,10 @@ void AppStorePanel::filter_category(const std::string &category) {
 void AppStorePanel::refresh_apps() {
   apps.clear();
 
-  // Try running `openke-app list --json`
+  // Try running `rosetteos-app list --json`
   bool loaded_via_cli = false;
   try {
-    auto p = sp::Popen({"/usr/bin/openke-app", "list", "--json"}, sp::output{sp::PIPE}, sp::error{sp::PIPE});
+    auto p = sp::Popen({"/usr/bin/rosetteos-app", "list", "--json"}, sp::output{sp::PIPE}, sp::error{sp::PIPE});
     auto res = p.communicate();
     std::string out_str;
     if (res.first.length > 0 && res.first.buf.data() != nullptr) {
@@ -607,7 +607,7 @@ void AppStorePanel::refresh_apps() {
       }
     }
   } catch (const std::exception &e) {
-    spdlog::warn("AppStore: openke-app execution failed: {}", e.what());
+    spdlog::warn("AppStore: rosetteos-app execution failed: {}", e.what());
   }
 
   // Fallback direct JSON file load if CLI is unavailable
@@ -622,13 +622,13 @@ void AppStorePanel::refresh_apps() {
           if (j.contains("apps") && j["apps"].is_array()) {
             std::string active_web = "mainsail";
             std::string active_touch = "guppyscreen";
-            if (fs::exists("/usr/data/openke/active_web_ui")) {
-              std::ifstream awf("/usr/data/openke/active_web_ui");
+            if (fs::exists("/usr/data/rosetteos/active_web_ui")) {
+              std::ifstream awf("/usr/data/rosetteos/active_web_ui");
               std::string val;
               if (awf >> val && !val.empty()) active_web = val;
             }
-            if (fs::exists("/usr/data/openke/active_touch_ui")) {
-              std::ifstream atf("/usr/data/openke/active_touch_ui");
+            if (fs::exists("/usr/data/rosetteos/active_touch_ui")) {
+              std::ifstream atf("/usr/data/rosetteos/active_touch_ui");
               std::string val;
               if (atf >> val && !val.empty()) active_touch = val;
             }
@@ -647,7 +647,7 @@ void AppStorePanel::refresh_apps() {
 
               // Check if installed via metadata, probe_path, or apps directory
               bool installed = app.is_builtin;
-              std::string meta_path = "/usr/data/openke/installed/" + app.id + ".json";
+              std::string meta_path = "/usr/data/rosetteos/installed/" + app.id + ".json";
               if (!installed && fs::exists(meta_path)) {
                 installed = true;
                 try {
@@ -659,7 +659,7 @@ void AppStorePanel::refresh_apps() {
                   }
                 } catch (...) {}
               }
-              if (!installed && fs::exists("/usr/data/openke/apps/" + app.id)) {
+              if (!installed && fs::exists("/usr/data/rosetteos/apps/" + app.id)) {
                 installed = true;
               }
               if (!installed && item.contains("probe_path") && item["probe_path"].is_string() && fs::exists(item["probe_path"].get<std::string>())) {
@@ -682,8 +682,8 @@ void AppStorePanel::refresh_apps() {
               app.has_service = item.contains("service") || item.contains("service_init");
               bool svc_enabled = true;
               bool svc_found = false;
-              if (fs::exists("/usr/data/openke/services.d")) {
-                for (const auto &entry : fs::directory_iterator("/usr/data/openke/services.d")) {
+              if (fs::exists("/usr/data/rosetteos/services.d")) {
+                for (const auto &entry : fs::directory_iterator("/usr/data/rosetteos/services.d")) {
                   std::string fname = entry.path().filename().string();
                   if (fname.find(app.id) != std::string::npos) {
                     svc_found = true;
@@ -1552,7 +1552,7 @@ void AppStorePanel::stream_process_output(const std::string &cmd, const std::str
     FILE *pipe = proc.output();
     if (!pipe) {
       task_exit_code.store(1);
-      task_error_msg = "Failed to launch openke-app process.";
+      task_error_msg = "Failed to launch rosetteos-app process.";
       return;
     }
 
@@ -1696,7 +1696,7 @@ void AppStorePanel::execute_refresh() {
   }
 
   worker_thread = std::thread([this]() {
-    stream_process_output("/usr/bin/openke-app update", "Checking for catalog updates...");
+    stream_process_output("/usr/bin/rosetteos-app update", "Checking for catalog updates...");
     task_finished.store(true);
   });
 }
@@ -1713,7 +1713,7 @@ void AppStorePanel::execute_install(const AppItem &app, bool activate) {
   }
 
   worker_thread = std::thread([this, app, activate]() {
-    std::string cmd = "/usr/bin/openke-app install " + app.id;
+    std::string cmd = "/usr/bin/rosetteos-app install " + app.id;
     if (activate) {
       cmd += " --activate";
     }
@@ -1734,7 +1734,7 @@ void AppStorePanel::execute_update(const AppItem &app) {
   }
 
   worker_thread = std::thread([this, app]() {
-    std::string cmd = "/usr/bin/openke-app install " + app.id;
+    std::string cmd = "/usr/bin/rosetteos-app install " + app.id;
     if (app.is_active) {
       cmd += " --activate";
     }
@@ -1766,9 +1766,9 @@ void AppStorePanel::execute_activate(const AppItem &app) {
 
   std::string cmd;
   if (app.category == "web_ui") {
-    cmd = fmt::format("/usr/bin/openke-app set-active-web {}", app.id);
+    cmd = fmt::format("/usr/bin/rosetteos-app set-active-web {}", app.id);
   } else if (app.category == "touch_ui") {
-    cmd = fmt::format("/usr/bin/openke-app set-active-touch {}", app.id);
+    cmd = fmt::format("/usr/bin/rosetteos-app set-active-touch {}", app.id);
   } else {
     return;
   }
@@ -1795,7 +1795,7 @@ void AppStorePanel::execute_remove(const AppItem &app) {
   }
 
   worker_thread = std::thread([this, app]() {
-    std::string cmd = "/usr/bin/openke-app remove " + app.id;
+    std::string cmd = "/usr/bin/rosetteos-app remove " + app.id;
     stream_process_output(cmd, "Uninstalling...");
     task_finished.store(true);
   });
@@ -1832,7 +1832,7 @@ void AppStorePanel::execute_service_action(const AppItem &app, const std::string
   }
 
   worker_thread = std::thread([this, app, action, initial_stage]() {
-    std::string cmd = fmt::format("/usr/bin/openke-app service {} {}", action, app.id);
+    std::string cmd = fmt::format("/usr/bin/rosetteos-app service {} {}", action, app.id);
     stream_process_output(cmd, initial_stage);
     task_finished.store(true);
   });

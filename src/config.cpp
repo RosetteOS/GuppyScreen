@@ -150,14 +150,14 @@ void Config::init(std::string config_path, const std::string thumbdir) {
 
     // Only used when guppyconfig.json omits this key entirely - the normal
     // case is that the deployed guppyconfig.json sets it explicitly to match
-    // whatever init script the platform actually ships (e.g. OpenKE's own
+    // whatever init script the platform actually ships (e.g. RosetteOS's own
     // guppyconfig.json should point at /etc/init.d/S58guppyscreen, its real
-    // service script - see OpenKE-firmware's overlay). S99guppyscreen was
-    // the previous value here; it's OpenKE's own script name and doesn't
-    // exist on OpenKE, so a config that's missing this key entirely would
+    // service script - see RosetteOS-firmware's overlay). S99guppyscreen was
+    // the previous value here; it's RosetteOS's own script name and doesn't
+    // exist on RosetteOS, so a config that's missing this key entirely would
     // have silently pointed "Restart Guppy" at a nonexistent path. This repo
-    // (OpenKE-guppyscreen) is pinned and built directly by OpenKE, so its
-    // own compiled-in fallback should match what OpenKE actually deploys.
+    // (RosetteOS-guppyscreen) is pinned and built directly by RosetteOS, so its
+    // own compiled-in fallback should match what RosetteOS actually deploys.
     auto &guppy_init = data["/guppy_init_script"_json_pointer];
     if (guppy_init.is_null() || guppy_init == "service guppyscreen") {
       data["/guppy_init_script"_json_pointer] = "/etc/init.d/S58guppyscreen";

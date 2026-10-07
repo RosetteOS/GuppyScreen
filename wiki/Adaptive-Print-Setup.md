@@ -1,6 +1,6 @@
 # Adaptive Meshing + Purge Line
 
-OpenKE makes your printer smarter about bed preparation before each print:
+RosetteOS makes your printer smarter about bed preparation before each print:
 
 - **Adaptive meshing** — instead of mapping the whole 220×220 mm bed every time, it maps only the
   area your actual print footprint covers. Faster, and the points are denser where it matters.
@@ -26,19 +26,19 @@ own purge/skirt, or skip `SMART_PARK` if you don't care where the nozzle parks w
 - 🧰 **You need:** the printer, Mainsail/Fluidd in a browser, and your slicer.
 - ↩️ **Safe to try:** fully reversible — see [Undoing it](#undoing-it).
 
-> ⚠️ These changes live in the printer's system files. **A Creality firmware update will erase them.** Re-run the OpenKE installer afterwards and they come back.
+> ⚠️ These changes live in the printer's system files. **A Creality firmware update will erase them.** Re-run the RosetteOS installer afterwards and they come back.
 
 ---
 
 ## Step 1 — Make sure it's installed
 
-The OpenKE installer drops this in during the print-quality mods step. To verify, check Mainsail's
+The RosetteOS installer drops this in during the print-quality mods step. To verify, check Mainsail's
 Machine tab for a `GuppyScreen/modules/` folder (with `Adaptive_Meshing.cfg`, `Line_Purge.cfg`,
 `Smart_Park.cfg`, `Start_Print.cfg` inside) plus `GuppyScreen/Settings.cfg`. If they're there,
 you're good — jump to Step 2.
 
 If not, re-run the [installer](Installation) and answer **Y** at the print-quality mods prompt. If
-you previously had **KAMP** installed (an older OpenKE version vendored it directly), the installer
+you previously had **KAMP** installed (an older RosetteOS version vendored it directly), the installer
 detects it, carries over any settings you'd customized, and removes the old files automatically —
 nothing to do by hand.
 
@@ -249,9 +249,9 @@ Then `FIRMWARE_RESTART`. Remove `START_PRINT` (or `ADAPTIVE_BED_MESH_CALIBRATE`,
 Unlike most third-party Klipper mods, this isn't a vendored copy of someone else's package anymore.
 `ADAPTIVE_BED_MESH_CALIBRATE` delegates to Klipper's own native adaptive meshing (ported onto the
 KE's older Klipper via a small, targeted patch — see `patch_bed_mesh.py`); `SMART_PARK` and
-`LINE_PURGE` are OpenKE-maintained macros (originally adapted from
+`LINE_PURGE` are RosetteOS-maintained macros (originally adapted from
 [KAMP](https://github.com/kyleisah/Klipper-Adaptive-Meshing-Purging), credited in `NOTICE.md`);
-`START_PRINT` is original OpenKE code that just calls the other three in sequence.
+`START_PRINT` is original RosetteOS code that just calls the other three in sequence.
 Everything lives in [`k1/k1_mods/klipper_mods/adaptive_print_setup/`](../k1/k1_mods/klipper_mods/adaptive_print_setup/)
 if you want to see or adapt it yourself — see [Building from Source](Building-from-Source).
 

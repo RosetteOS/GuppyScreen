@@ -25,10 +25,10 @@ LV_IMG_DECLARE(back);
 LV_IMG_DECLARE(cancel);
 LV_IMG_DECLARE(emergency);
 
-#ifdef OPENKE_VERSION
-#define OPENKE_VER_STR OPENKE_VERSION
+#ifdef ROSETTEOS_VERSION
+#define ROSETTEOS_VER_STR ROSETTEOS_VERSION
 #else
-#define OPENKE_VER_STR "dev-snapshot"
+#define ROSETTEOS_VER_STR "dev-snapshot"
 #endif
 
 std::vector<std::string> SysInfoPanel::log_levels = {
@@ -437,7 +437,7 @@ void SysInfoPanel::foreground() {
     network_detail.push_back(fmt::format("\t{}: {}", iface, ip));
   }
   std::string active_slot = KUtils::get_active_slot_num();
-  lv_label_set_text(network_label, fmt::format("{}\n\nSystem\n\tActive Slot: {}\n\tOpenKE: v" OPENKE_VER_STR,
+  lv_label_set_text(network_label, fmt::format("{}\n\nSystem\n\tRosetteOS: v" ROSETTEOS_VER_STR,
     fmt::join(network_detail, "\n"), active_slot).c_str());
 }
 
@@ -592,16 +592,16 @@ void SysInfoPanel::show_reset_options() {
     "Deletes display config and sensor layout.\nGuppyScreen restarts with defaults."
   );
 
-  // OpenKE Phase 0 cleanup: /etc/init.d/S58factoryreset is confirmed absent
-  // from OpenKE overlay. Capability-gate this
+  // RosetteOS Phase 0 cleanup: /etc/init.d/S58factoryreset is confirmed absent
+  // from RosetteOS overlay. Capability-gate this
   // button the same way spoolman_btn is gated in setting_panel.cpp, rather
   // than leaving a dead button with no user-visible error.
   bool have_factory_reset = fs::exists("/etc/init.d/S58factoryreset");
   lv_obj_t *btn2 = make_opt_btn(
     "Factory Reset Printer",
     have_factory_reset
-      ? "Wipes OpenKE, Klipper config, gcodes and\ncalibration. Reboots to stock Creality firmware."
-      : "Not available on this build - OpenKE has\nno factory-reset/recovery script yet."
+      ? "Wipes RosetteOS, Klipper config, gcodes and\ncalibration. Reboots to stock Creality firmware."
+      : "Not available on this build - RosetteOS has\nno factory-reset/recovery script yet."
   );
   if (!have_factory_reset) {
     // Disable the button and its label/desc children, same as
@@ -651,7 +651,7 @@ void SysInfoPanel::show_reset_options() {
     if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
     ((SysInfoPanel *)e->user_data)->show_reset_confirm(
       "Factory Reset Printer?",
-      "Wipes OpenKE, Klipper config, gcodes\nand calibration. Reboots to stock.\n\nThis cannot be undone.",
+      "Wipes RosetteOS, Klipper config, gcodes\nand calibration. Reboots to stock.\n\nThis cannot be undone.",
       []() {
         spdlog::warn("Factory reset printer: executing S58factoryreset reset");
         system("/etc/init.d/S58factoryreset reset");
@@ -752,5 +752,4 @@ void SysInfoPanel::show_safety_alert(const char *title, const std::string &detai
 
   lv_obj_center(mbox);
 }
-
 

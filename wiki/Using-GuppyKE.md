@@ -1,6 +1,6 @@
 # Screen Reference — Every Panel, Every Setting
 
-Plain-English reference for every screen in OpenKE. If you're looking at something and wondering
+Plain-English reference for every screen in RosetteOS. If you're looking at something and wondering
 "what does this do?" — find it here.
 
 > 🔒 **You can't break a running print by exploring the screen.** Anything that would interrupt a job is
@@ -641,8 +641,8 @@ These execute immediately — no sub-panel opens:
 |---|---|
 | **Restart Klipper** | Restarts the Klipper host process. Use after editing `printer.cfg`. |
 | **Restart Firmware** | Resets the mainboard MCU (`FIRMWARE_RESTART`). Use after MCU-level config changes. |
-| **Restart Guppy** | Restarts the OpenKE screen process only (not Klipper). Use if the UI feels stuck. |
-| **Update Guppy** | Downloads and installs the latest OpenKE screen binary. **Note:** only swaps the binary — for full updates (Klipper mods, adaptive mesh config, etc.) re-run the full installer. |
+| **Restart Guppy** | Restarts the RosetteOS screen process only (not Klipper). Use if the UI feels stuck. |
+| **Update Guppy** | Downloads and installs the latest RosetteOS screen binary. **Note:** only swaps the binary — for full updates (Klipper mods, adaptive mesh config, etc.) re-run the full installer. |
 
 ### Navigation row (main row)
 
@@ -771,7 +771,7 @@ Opens from Settings → **Printers**. Manages Moonraker connections.
 
 Each configured printer is shown as a card with its name, IP, and port, plus:
 
-- **Switch** — reconnects OpenKE to that printer
+- **Switch** — reconnects RosetteOS to that printer
 - **✕ (close icon)** — removes it from the config. Asks you to tap **Confirm** or **Cancel** first;
   there's no text label on the button itself, just the ✕ icon.
 
@@ -803,10 +803,10 @@ on your network — the button is greyed out until one is configured.
 ![System panel](images/system-panel.png)
 
 Opens from Settings → **System**. This is the main settings panel for the screen itself — everything
-that changes how OpenKE behaves.
+that changes how RosetteOS behaves.
 
 **Network info label** (top of right column): shows each network interface and its IP address, plus the
-currently running OpenKE version. Read-only.
+currently running RosetteOS version. Read-only.
 
 ### Left column
 
@@ -835,9 +835,9 @@ Tap the **Reset Options** button (top-right corner of the System panel) to open 
 
 | Option | What it does |
 |---|---|
-| **Reset GuppyScreen settings** | Deletes the screen config and sensor layout (`guppyconfig.json`). OpenKE restarts with factory defaults. Your Klipper config and print files are **not** touched. |
-| **Factory Reset Printer** | Wipes OpenKE, all Klipper config, gcodes, and calibration. Reboots to stock Creality firmware. **Irreversible.** WiFi and Creality cloud account are preserved. See [Resetting & Uninstalling](Resetting-and-Uninstalling). |
-| **Reset Touch Calibration** | Clears saved calibration. OpenKE restarts and shows the 9-tap calibration wizard immediately. |
+| **Reset GuppyScreen settings** | Deletes the screen config and sensor layout (`guppyconfig.json`). RosetteOS restarts with factory defaults. Your Klipper config and print files are **not** touched. |
+| **Factory Reset Printer** | Wipes RosetteOS, all Klipper config, gcodes, and calibration. Reboots to stock Creality firmware. **Irreversible.** WiFi and Creality cloud account are preserved. See [Resetting & Uninstalling](Resetting-and-Uninstalling). |
+| **Reset Touch Calibration** | Clears saved calibration. RosetteOS restarts and shows the 9-tap calibration wizard immediately. |
 
 Tap **Close** to dismiss without doing anything.
 

@@ -5,7 +5,7 @@ what to do. **Short version: updating is safe and your calibrations are kept.**
 
 ## v1.2.0 — the hardware H.264 camera stream was removed (auto-handled)
 
-`v1.2.0-OpenKE` **removes the optional H.264 camera stream** (the go2rtc add-on). On the KE's tiny
+`v1.2.0-RosetteOS` **removes the optional H.264 camera stream** (the go2rtc add-on). On the KE's tiny
 197 MB box, the go2rtc + ffmpeg stack (~44 MB) is the main driver of memory-pressure freezes — the
 "screen goes dark, SSH dies, only a power-cycle recovers" symptom. Dropping it and going back to the
 stock camera is the reliable fix.
@@ -25,11 +25,11 @@ Your **stock camera and persistent image tuning are untouched** either way (the 
 modified by the H.264 add-on). If you relied on the H.264 stream in an external app (Frigate, Home
 Assistant, Obico…), point that app at the stock camera instead.
 
-## First, the name: GuppyKE → OpenKE
+## The firmware name: GuppyKE → RosetteOS → RosetteOS
 
-Same project, new name. Older releases were tagged `vX.Y-GuppyKE`; new ones are `vX.Y-OpenKE`. You'll
-still see `GuppyKE` in a few file names and older messages — it's the same thing. The repo URL is
-**unchanged** (`coreflake1/guppyscreen`), so your in-app updater keeps working without any action.
+Same firmware, new name. Older releases were tagged `vX.Y-GuppyKE` and `vX.Y-RosetteOS`; those historic
+tags and the GuppyScreen repository URL remain unchanged. RosetteOS continues to use the same
+GuppyScreen code and updater.
 
 ## Will I lose my settings or have to recalibrate?
 
@@ -64,21 +64,21 @@ that, the on-screen **Update Guppy** button works for every future release.
 
 ## After updating: grab the newly-bundled extras (optional)
 
-Recent OpenKE folds what used to be manual add-ons into the installer, under a prompt
+Recent RosetteOS installs fold what used to be manual add-ons into the installer, under a prompt
 (**install all / skip all / choose each**): adaptive mesh + purge + park, Axis Twist Compensation, TMC Autotune, Skew Correction,
 the Creality Nebula camera (persistent image tuning), the Pause/Resume layer-shift fix,
 and the Creality macros (M600, Save Z-Offset, useful macros, Exclude Object). See
 [Installation](Installation) for the full list.
 
 > **Buzzer beeps & songs — a one-time installer re-run (only if you're crossing this version).** Buzzer
-> sounds (real-pitch `M300`, `PLAY_TUNE`, the soft touch click) first ship in **`v1.1.0-OpenKE`**. This
+> sounds (real-pitch `M300`, `PLAY_TUNE`, the soft touch click) first ship in **`v1.1.0-RosetteOS`**. This
 > note **only** applies if you're upgrading from a release **older than that** — and only because the
 > on-screen **Update Guppy** button swaps the screen binary but doesn't touch your Klipper config dir,
 > where the `M300`/`PLAY_TUNE` macros and default `songs.conf` live. **Re-run the
 > [installer](Installation) once** (safe, keeps your config) to pick them up.
 >
 > **Going forward this is a non-issue:** fresh installs already include everything, and once you're on
-> `v1.1.0-OpenKE` or newer your `songs.conf` is preserved on every future install/update. Same
+> `v1.1.0-RosetteOS` or newer your `songs.conf` is preserved on every future install/update. Same
 > "config-side features come from the installer" rule as the items above.
 
 - **Already set these up yourself** — by hand or via the **Creality Helper Script**? You don't have to do
@@ -96,5 +96,5 @@ cold boot always clears it. See [Troubleshooting](Troubleshooting).
 
 ## Coming from upstream GuppyScreen (ballaswag / probielodan)?
 
-Just run the OpenKE [installer](Installation). It swaps in the KE build and adds the KE-specific setup,
-while keeping your `printer.cfg` and calibrations. From then on you're on the OpenKE update track.
+Just run the RosetteOS [installer](Installation). It swaps in the KE build and adds the KE-specific setup,
+while keeping your `printer.cfg` and calibrations. The firmware then follows the RosetteOS update path.

@@ -61,8 +61,8 @@ else
 CSRCS 			+= $(wildcard $(LVGL_DIR)/assets/$(ASSET_DIR)/*.c)
 endif
 
-ifdef OPENKE_VERSION
-DEFINES			+= -D OPENKE_VERSION="\"${OPENKE_VERSION}\""
+ifdef ROSETTEOS_VERSION
+DEFINES			+= -D ROSETTEOS_VERSION="\"${ROSETTEOS_VERSION}\""
 endif
 
 OBJEXT 			?= .o

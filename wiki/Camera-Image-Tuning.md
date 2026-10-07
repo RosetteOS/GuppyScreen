@@ -11,17 +11,17 @@ catch: those settings are **forgotten every time the camera re-initialises** (a 
 camera daemon restarting). This page shows how to tune them *and* make them **stick across reboots**, so
 you set them once and never think about it again.
 
-> ✅ **If you used the OpenKE installer's "Creality Nebula camera" option, you already have everything on
+> ✅ **If you used the RosetteOS installer's "Creality Nebula camera" option, you already have everything on
 > this page** — it installs the `CAM_*` macros themselves (not just the persist-on-boot logic). Skip to
-> [Using it](#using-it-if-you-installed-via-openke) below. The rest of this page is the **manual route**
-> (no OpenKE installer, or you're specifically adding this to an existing Creality Helper Script setup),
+> [Using it](#using-it-if-you-installed-via-rosetteos) below. The rest of this page is the **manual route**
+> (no RosetteOS installer, or you're specifically adding this to an existing Creality Helper Script setup),
 > and explains what those macros actually do under the hood.
 
 You don't need to be a programmer — if you can paste a command into a terminal, you can do this.
 
 ---
 
-## Using it (if you installed via OpenKE)
+## Using it (if you installed via RosetteOS)
 
 Nothing to set up — from the **Klipper console** (Mainsail/Fluidd), just run:
 
@@ -55,7 +55,7 @@ which covers exactly that case.
 
 ---
 
-## The manual route (no OpenKE installer, or adding this to an existing Helper Script setup)
+## The manual route (no RosetteOS installer, or adding this to an existing Helper Script setup)
 
 ### Why camera settings don't stick on their own
 
@@ -65,7 +65,7 @@ not saved anywhere. The moment the camera re-initialises, it comes back at its f
 tuning is gone. They're **not** `printer.cfg`/`SAVE_CONFIG` values, so the usual Klipper save doesn't cover
 them.
 
-The fix is a small pattern (this is exactly what OpenKE's own macros do):
+The fix is a small pattern (this is exactly what RosetteOS's own macros do):
 
 1. **`[save_variables]`** stores your chosen values in a file.
 2. Each **`CAM_*` macro** applies the value live **and** saves it.
@@ -80,7 +80,7 @@ applied and remembered — no config editing.
 |---|---|
 | Printer | Creality Ender-3 V3 KE |
 | Camera | Creality **Nebula** (USB UVC, controls on `/dev/video4`) |
-| Builds on | Creality Helper Script → **Nebula Camera Settings Control** (provides the `CAM_*` macros, if you're not using OpenKE's own) |
+| Builds on | Creality Helper Script → **Nebula Camera Settings Control** (provides the `CAM_*` macros, if you're not using RosetteOS's own) |
 | Interface | Mainsail (Fluidd works too) |
 
 ### Before you start
@@ -109,7 +109,7 @@ gcode:
 ```
 
 Do the same for `CAM_BRIGHTNESS` (`cam_brightness`), `CAM_SATURATION` (`cam_saturation`), and `CAM_HUE`
-(`cam_hue`) — these four (brightness, contrast, saturation, hue) are exactly the controls OpenKE's own
+(`cam_hue`) — these four (brightness, contrast, saturation, hue) are exactly the controls RosetteOS's own
 macros manage. Then add a re-apply macro and the boot timer at the end of the file:
 
 ```ini
@@ -137,7 +137,7 @@ gcode:
 
 > ### ⚠️ Only one `[save_variables]` allowed
 > `SAVE_VARIABLE` needs a `[save_variables]` section, but **Klipper permits exactly one** in the whole
-> config. If you have the Helper Script's **Save Z-Offset**, or OpenKE's own Save Z-Offset / camera-tuning
+> config. If you have the Helper Script's **Save Z-Offset**, or RosetteOS's own Save Z-Offset / camera-tuning
 > feature, already installed, one already exists (filename `variables.cfg`, possibly under a
 > `Helper-Script/` subfolder depending on which one) — **reuse it, don't add a second**, or Klipper will
 > misbehave. Only if you have *no* `[save_variables]` anywhere should you add one:
@@ -195,7 +195,7 @@ grep cam_ <that filename>
 
 ## Undoing it
 
-**Installed via OpenKE:** re-run the installer's optional-features step and skip the Creality Nebula camera
+**Installed via RosetteOS:** re-run the installer's optional-features step and skip the Creality Nebula camera
 option, then remove `GuppyScreen/nebula_camera.cfg` and `FIRMWARE_RESTART`.
 
 **Installed manually:** remove the `SAVE_VARIABLE` lines you added and the `APPLY_CAM_SETTINGS*` blocks from

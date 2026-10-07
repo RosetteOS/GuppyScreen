@@ -1,11 +1,11 @@
 # Quieter, Cooler Steppers (TMC Autotune)
 
-OpenKE has a built-in **TMC Autotune** screen (**Tune → TMC Autotune**) that re-tunes your stepper
+RosetteOS has a built-in **TMC Autotune** screen (**Tune → TMC Autotune**) that re-tunes your stepper
 drivers from the *motor type* — quieter motion, cooler drivers, and a touch smoother surface, applied
 automatically on every boot. You pick the motor and a goal from two dropdowns and tap Save. No tuning
 math, no datasheets.
 
-The OpenKE installer sets up everything this needs, so on a normal install the button is **already
+The RosetteOS installer sets up everything this needs, so on a normal install the button is **already
 enabled** — skip to [Pick your motors and tune](#pick-your-motors-and-tune). If your button is greyed
 out, the section just below explains why and how to fix it in one step.
 
@@ -13,12 +13,12 @@ out, the section just below explains why and how to fix it in one step.
 
 ## If the button is greyed out
 
-Autotuning is done by a small **Klipper add-on** that doesn't come with Creality's firmware. OpenKE
+Autotuning is done by a small **Klipper add-on** that doesn't come with Creality's firmware. RosetteOS
 checks for it at startup — specifically `klippy/extras/motor_database.cfg` — and **only un-greys the
 button when it's present.** The installer puts it there for you, so normally it's enabled.
 
 If it's still greyed out, you either declined the print-quality mods at install time, or a firmware
-update wiped them. The fix is one step: **re-run the OpenKE [installer](Installation)**, answer **Y** at
+update wiped them. The fix is one step: **re-run the RosetteOS [installer](Installation)**, answer **Y** at
 the mods prompt (it's safe to run again), then **Restart Klipper**. Done. *(If it shuts down with a
 `serialqueue … NoneType` error, that's a harmless KE restart race — just restart once more, see
 [Troubleshooting](Troubleshooting).)*
@@ -75,12 +75,12 @@ If your motors are already quiet and you have no thermal concerns, this is a nic
 
 ## What the installer did
 
-When you ran the OpenKE [installer](Installation) and said **Y** to the print-quality mods, it copied the
+When you ran the RosetteOS [installer](Installation) and said **Y** to the print-quality mods, it copied the
 autotune add-on (three files) into Klipper **and** shipped the `[guppy_config_helper]` line that lets the
 on-screen **Save** button work. No SSH, no downloads — the **Tune → TMC Autotune** button is enabled and
 the screen lists each stepper (X, Y, Z) with two dropdowns.
 
-> **Which add-on?** OpenKE vendors [evgarthub/klipper_tmc_autotune_k1](https://github.com/evgarthub/klipper_tmc_autotune_k1)
+> **Which add-on?** RosetteOS vendors [evgarthub/klipper_tmc_autotune_k1](https://github.com/evgarthub/klipper_tmc_autotune_k1)
 > — a version of the popular [Klipper TMC Autotune](https://github.com/andrewmcgr/klipper_tmc_autotune)
 > adapted for the Creality K1/KE. The stock upstream assumes a Raspberry Pi layout and won't load cleanly
 > on the KE.
@@ -129,7 +129,7 @@ driver registers. From now on it re-applies them automatically on every boot —
 ## Undoing it
 
 To turn a single axis back to stock, open its entry on the screen, set **Motor** back to *"Not
-Configured,"* and tap **Save/Restart** — OpenKE removes that `[autotune_tmc]` section for you.
+Configured,"* and tap **Save/Restart** — RosetteOS removes that `[autotune_tmc]` section for you.
 
 To remove the add-on entirely, over SSH:
 
@@ -148,7 +148,7 @@ drivers return to Creality's defaults.
 ## After a firmware update
 
 A Creality firmware update wipes the three add-on files (they live on the system partition). Putting it
-back takes a couple of minutes: **re-run the OpenKE [installer](Installation)** and answer **Y** at the
+back takes a couple of minutes: **re-run the RosetteOS [installer](Installation)** and answer **Y** at the
 mods prompt, then `FIRMWARE_RESTART`. Your motor/goal choices are stored in `printer.cfg`, so they come
 back on their own — just open **Tune → TMC Autotune** to confirm.
 
@@ -166,7 +166,7 @@ the installer changed), here are the steps.
 
 Over SSH (`ssh root@<printer-ip>`):
 
-**1. Install the add-on** — three files into Klipper's add-on folder. **Use the exact commit OpenKE
+**1. Install the add-on** — three files into Klipper's add-on folder. **Use the exact commit RosetteOS
 vendors and tests against**, not the upstream `main` branch — `main` can move on without notice and end
 up different from what this page (and the installer) was actually verified with:
 
@@ -181,7 +181,7 @@ done
 All three are required; `motor_database.cfg` is read automatically (no `[include]` needed).
 
 **2. Enable the Save button** — add `[guppy_config_helper]` on its own line to
-`/usr/data/printer_data/config/GuppyScreen/guppy_cmd.cfg` (OpenKE now ships this by default, so you may
+`/usr/data/printer_data/config/GuppyScreen/guppy_cmd.cfg` (RosetteOS now ships this by default, so you may
 already have it). Without it, the on-screen Save fails with "Unknown command".
 
 **3. Restart** — **Restart Klipper** (Mainsail → *Restart*, or `FIRMWARE_RESTART`). The button lights up.
@@ -201,6 +201,6 @@ host-MCU race ([Troubleshooting](Troubleshooting)).
   missing from `GuppyScreen/guppy_cmd.cfg`. Re-running the installer adds it; then restart.
 - **Config error about `motor_constants`** — you have `autotune_tmc.py` but not `motor_constants.py`
   (e.g. a partial manual install). Re-run the installer, which copies all three.
-- **Where's the Sensorless Threshold field?** — it isn't shown on the KE. OpenKE only displays it for
+- **Where's the Sensorless Threshold field?** — it isn't shown on the KE. RosetteOS only displays it for
   drivers with StallGuard (2209 and up); the KE's TMC2208 drivers don't have it, so the panel hides it.
   Nothing's broken — there's just nothing to set there.

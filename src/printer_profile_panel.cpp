@@ -13,9 +13,9 @@ namespace sp = subprocess;
 LV_IMG_DECLARE(back);
 LV_IMG_DECLARE(print);
 
-static const char *DEFAULT_SEEDS_DIR = "/opt/openke-seeds/printer_profiles";
-static const char *USER_PROFILES_DIR = "/usr/data/openke/printer_profiles";
-static const char *ACTIVE_MARKER_PATH = "/usr/data/openke/system/active-profile.json";
+static const char *DEFAULT_SEEDS_DIR = "/opt/rosetteos-seeds/printer_profiles";
+static const char *USER_PROFILES_DIR = "/usr/data/rosetteos/printer_profiles";
+static const char *ACTIVE_MARKER_PATH = "/usr/data/rosetteos/system/active-profile.json";
 
 PrinterProfilePanel::PrinterProfilePanel(KWebSocketClient &c)
   : ws(c)
@@ -396,10 +396,10 @@ void PrinterProfilePanel::show_switch_confirm(const PrinterProfileItem &profile)
 void PrinterProfilePanel::select_profile(const PrinterProfileItem &profile) {
   spdlog::info("Applying printer profile: {} ({})", profile.name, profile.id);
 
-  std::string cmd = fmt::format("/usr/bin/openke-profile set {} --restart", profile.id);
+  std::string cmd = fmt::format("/usr/bin/rosetteos-profile set {} --restart", profile.id);
   int rc = sp::call(cmd);
   if (rc != 0) {
-    spdlog::warn("openke-profile set exited with code {}", rc);
+    spdlog::warn("rosetteos-profile set exited with code {}", rc);
     static const char *err_btns[] = {"OK", ""};
     std::string err_msg = fmt::format(
       "#FF5252 Cannot Switch Profile#\n\n"

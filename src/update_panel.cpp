@@ -148,7 +148,7 @@ void UpdatePanel::handle_callback(lv_event_t *event) {
 }
 
 static std::string get_current_os_version() {
-  std::ifstream vfile("/etc/openke-version");
+  std::ifstream vfile("/etc/rosetteos-version");
   if (vfile.is_open()) {
     std::string v;
     if (std::getline(vfile, v) && !v.empty()) {
@@ -233,7 +233,7 @@ static void parse_swu_metadata(const std::string &swu_path, const std::string &f
   }
 
   // Fallback to filename version if sw-description version is absent
-  if (version_out.empty() && filename.rfind("openke-update-", 0) == 0) {
+  if (version_out.empty() && filename.rfind("rosetteos-update-", 0) == 0) {
     std::string v = filename.substr(14);
     if (v.size() > 4 && v.substr(v.size() - 4) == ".swu") {
       version_out = v.substr(0, v.size() - 4);
@@ -299,8 +299,8 @@ static bool is_git_commit_hash(const std::string &v) {
 
 static std::string get_remote_manifest_url() {
   std::vector<std::string> conf_paths = {
-    "/usr/data/openke/openke-update.conf",
-    "/etc/openke-update.conf"
+    "/usr/data/rosetteos/rosetteos-update.conf",
+    "/etc/rosetteos-update.conf"
   };
   for (const auto &cp : conf_paths) {
     std::ifstream f(cp);
@@ -314,22 +314,22 @@ static std::string get_remote_manifest_url() {
       }
     }
   }
-  return "https://raw.githubusercontent.com/OpenKlipperEdition/OpenKE/main/manifests/releases.json";
+  return "https://raw.githubusercontent.com/RosetteOS/RosetteOS/main/manifests/releases.json";
 }
 
 static void scan_remote_repo(std::vector<UpdatePackageItem> &packages, const std::string &current_ver) {
   std::string manifest_url = get_remote_manifest_url();
-  std::string tmp_manifest = "/tmp/openke-remote-releases.json";
+  std::string tmp_manifest = "/tmp/rosetteos-remote-releases.json";
   unlink(tmp_manifest.c_str());
 
   std::string cmd = "curl -s -f -k -m 4 -L '" + manifest_url + "' -o '" + tmp_manifest + "' 2>/dev/null";
   int rc = system(cmd.c_str());
   if ((rc != 0 || !fs::exists(tmp_manifest) || fs::file_size(tmp_manifest) == 0) &&
-      manifest_url.find("/OpenKlipperEdition/OpenKE/main/") != std::string::npos) {
+      manifest_url.find("/RosetteOS/RosetteOS/main/") != std::string::npos) {
     std::string fallback_url = manifest_url;
-    size_t pos = fallback_url.find("/OpenKlipperEdition/OpenKE/main/");
+    size_t pos = fallback_url.find("/RosetteOS/RosetteOS/main/");
     if (pos != std::string::npos) {
-      fallback_url.replace(pos, 32, "/OpenKlipperEdition/OpenKE/brupdate/");
+      fallback_url.replace(pos, 32, "/RosetteOS/RosetteOS/brupdate/");
       cmd = "curl -s -f -k -m 4 -L '" + fallback_url + "' -o '" + tmp_manifest + "' 2>/dev/null";
       rc = system(cmd.c_str());
     }
@@ -355,14 +355,14 @@ static void scan_remote_repo(std::vector<UpdatePackageItem> &packages, const std
   try {
     json j = json::parse(f);
 
-    // Format 1: OpenKE manifests/releases.json
+    // Format 1: RosetteOS manifests/releases.json
     if (j.contains("releases") && j["releases"].is_array()) {
       for (const auto &rel : j["releases"]) {
         if (!rel.contains("url") || !rel.contains("version")) continue;
 
         UpdatePackageItem item;
         item.file_path = rel.value("url", "");
-        item.file_name = rel.value("filename", "openke-update.swu");
+        item.file_name = rel.value("filename", "rosetteos-update.swu");
         item.version = rel.value("version", "");
         item.expected_sha256 = rel.value("sha256", "");
         item.release_notes = rel.value("release_notes", "");
@@ -434,12 +434,12 @@ static std::vector<std::string> get_dev_server_urls() {
   urls.push_back("http://192.168.1.88:8000");
 
   std::vector<std::string> conf_paths = {
-    "/usr/data/openke/openke-update.conf",
-    "/usr/data/printer_data/config/openke-update.conf",
-    "/etc/openke-update.conf",
-    "/tmp/openke-dev-server.conf",
-    "/tmp/openke-dev-url",
-    "/usr/data/openke-dev-url"
+    "/usr/data/rosetteos/rosetteos-update.conf",
+    "/usr/data/printer_data/config/rosetteos-update.conf",
+    "/etc/rosetteos-update.conf",
+    "/tmp/rosetteos-dev-server.conf",
+    "/tmp/rosetteos-dev-url",
+    "/usr/data/rosetteos-dev-url"
   };
 
   for (const auto &cp : conf_paths) {
@@ -501,7 +501,7 @@ static void scan_dev_servers(std::vector<UpdatePackageItem> &packages, const std
       item.is_nightly = true;
       item.file_size = "Local Server";
 
-      std::string head_file = "/tmp/openke-dev-head.txt";
+      std::string head_file = "/tmp/rosetteos-dev-head.txt";
       unlink(head_file.c_str());
       std::string hcmd = "curl -s -k -I -m 2 '" + base_url + "' -o '" + head_file + "' 2>/dev/null";
       if (system(hcmd.c_str()) == 0 && fs::exists(head_file)) {
@@ -528,7 +528,7 @@ static void scan_dev_servers(std::vector<UpdatePackageItem> &packages, const std
       manifest_url = base_url + "/releases.json";
     }
 
-    std::string tmp_manifest = "/tmp/openke-dev-manifest.json";
+    std::string tmp_manifest = "/tmp/rosetteos-dev-manifest.json";
     unlink(tmp_manifest.c_str());
     std::string cmd = "curl -s -f -k -m 2 -L '" + manifest_url + "' -o '" + tmp_manifest + "' 2>/dev/null";
     int rc = system(cmd.c_str());
@@ -563,7 +563,7 @@ static void scan_dev_servers(std::vector<UpdatePackageItem> &packages, const std
               if (!rel.contains("url") && !rel.contains("filename")) continue;
 
               std::string rel_url = rel.value("url", "");
-              std::string fname = rel.value("filename", "openke-update.swu");
+              std::string fname = rel.value("filename", "rosetteos-update.swu");
               if (rel_url.empty()) rel_url = fname;
 
               if (rel_url.rfind("http://", 0) != 0 && rel_url.rfind("https://", 0) != 0) {
@@ -618,10 +618,10 @@ static void scan_dev_servers(std::vector<UpdatePackageItem> &packages, const std
     }
       unlink(tmp_manifest.c_str());
     } else {
-      std::vector<std::string> swu_probes = { "openke-update.swu", "openke-update-1.0.0.swu" };
+      std::vector<std::string> swu_probes = { "rosetteos-update.swu", "rosetteos-update-1.0.0.swu" };
       for (const auto &swu_name : swu_probes) {
         std::string test_url = base_url + "/" + swu_name;
-        std::string head_file = "/tmp/openke-dev-probe-head.txt";
+        std::string head_file = "/tmp/rosetteos-dev-probe-head.txt";
         unlink(head_file.c_str());
         std::string pcmd = "curl -s -k -I -m 2 '" + test_url + "' -o '" + head_file + "' 2>/dev/null";
         if (system(pcmd.c_str()) == 0 && fs::exists(head_file)) {
@@ -1046,7 +1046,7 @@ void UpdatePanel::show_first_boot_whats_new_popup(const std::string &version, co
   lv_obj_clear_flag(whats_new_mbox, LV_OBJ_FLAG_SCROLLABLE);
 
   lv_obj_t *title = lv_label_create(whats_new_mbox);
-  std::string title_str = "Welcome to OpenKE v" + version;
+  std::string title_str = "Welcome to RosetteOS v" + version;
   lv_label_set_text(title, title_str.c_str());
   lv_obj_set_style_text_font(title, &lv_font_montserrat_16, 0);
   lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 0);
@@ -1095,9 +1095,9 @@ void UpdatePanel::check_first_boot_whats_new() {
   if (first_boot_checked) return;
   first_boot_checked = true;
 
-  std::string pending_file = "/usr/data/openke/.pending_whats_new";
+  std::string pending_file = "/usr/data/rosetteos/.pending_whats_new";
   if (!fs::exists(pending_file)) {
-    pending_file = "/usr/data/openke/pending_changelog.txt";
+    pending_file = "/usr/data/rosetteos/pending_changelog.txt";
   }
   if (!fs::exists(pending_file)) {
     return;
@@ -1116,7 +1116,7 @@ void UpdatePanel::check_first_boot_whats_new() {
   unlink(pending_file.c_str());
 
   if (changelog_text.empty()) {
-    changelog_text = "• Welcome to OpenKE!\n• System update installed successfully.";
+    changelog_text = "• Welcome to RosetteOS!\n• System update installed successfully.";
   }
 
   std::string current_ver = get_current_os_version();
@@ -1211,7 +1211,7 @@ void UpdatePanel::show_confirmation_modal(const UpdatePackageItem &pkg) {
   }
   std::string info_text = "• Package: " + pkg.file_name + " (" + pkg.file_size + ")\n"
                           "• Version: " + pkg_ver_str + "\n"
-                          "• Installed: OpenKE v" + current_ver + " (" + active_slot + ")\n"
+                          "• Installed: RosetteOS v" + current_ver + " (" + active_slot + ")\n"
                           "• Target Slot: " + target_slot + "\n"
                           "• Source: " + pkg.location_tag;
   if (printing) {
@@ -1454,14 +1454,14 @@ void UpdatePanel::execute_update_thread(UpdatePackageItem pkg) {
 
     // Clean up temporary app/update scratch files
     try {
-      if (fs::exists("/usr/data/openke/tmp")) {
-        for (const auto &entry : fs::directory_iterator("/usr/data/openke/tmp")) {
+      if (fs::exists("/usr/data/rosetteos/tmp")) {
+        for (const auto &entry : fs::directory_iterator("/usr/data/rosetteos/tmp")) {
           fs::remove_all(entry.path());
         }
       }
     } catch (...) {}
 
-    local_swu_path = staging_dir + "/openke-remote-update.swu";
+    local_swu_path = staging_dir + "/rosetteos-remote-update.swu";
     unlink(local_swu_path.c_str());
 
     uint64_t expected_total_bytes = pkg.total_size_bytes;

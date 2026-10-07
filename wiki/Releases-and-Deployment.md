@@ -1,17 +1,17 @@
 # Releases and Deployment
 
-Heads up: this page mostly describes OpenKE's own independent release process (`-OpenKE` tags,
+Heads up: this page mostly describes the historical standalone release process (`-RosetteOS` tags,
 `github.com/coreflake1/guppyscreen/releases`, its SSH installer) — inherited from this repo's
-upstream GuppyScreen history. OpenKE doesn't consume GuppyScreen through a separate release/tag/
-installer flow at all; `OpenKE` pins an exact commit of this repo directly and
+upstream GuppyScreen history. RosetteOS doesn't consume GuppyScreen through a separate release/tag/
+installer flow; its build pins an exact commit of this repo directly and
 cross-compiles it as one stage of the full OS build — see
-[Integration with OpenKE](Integration-with-OpenKE). The CI toolchain detail below is also out
+[Integration with RosetteOS](Integration-with-RosetteOS). The CI toolchain detail below is also out
 of date for this repo's own workflow — see [CI](CI) for the current state.
 
 ## CI pipeline
 
 Release artifacts are produced by `.github/workflows/build.yml`, which, as of the Final Closure
-mission (2026-08-15), runs inside `OpenKE`'s unified build image — not the
+mission (2026-08-15), runs inside RosetteOS's unified build image — not the
 `ghcr.io/coreflake1/guppydev:latest` container this page originally described. See [CI](CI) for
 the current state. The rest of this section (trigger conditions, packaging) still reflects this
 repo's own workflow: pushes to `main`/`develop` (nightly prerelease) and tags (stable release). The
@@ -54,18 +54,19 @@ GUPPYSCREEN_VERSION=0.1.1-ke-gui-fixes GUPPY_THEME=blue \
 
 (NebulaOS Phase 0 cleanup, 2026-08-16: `installer.sh`, `installer-deb.sh`, `update.sh`, and
 `debian/` were deleted from this repo as confirmed-dead legacy installer/packaging weight — never
-fetched or consumed by any NebulaOS or OpenKE boot path — so `release.sh` no longer packages them either.
+fetched or consumed by any NebulaOS or RosetteOS boot path — so `release.sh` no longer packages them either.
 `k1/k1_mods` itself is now just `buzzer/` (the `guppybeep` source) and `tmcstatus.py`.)
 
 The on-printer installer downloads the matching `*.tar.gz` from the GitHub release.
 
 ## Release tags
 
-Stable releases are tagged `vX.Y.Z-OpenKE` on `main` (e.g. `v1.5.0-OpenKE`) — check the
+Existing stable releases use historical `vX.Y.Z-RosetteOS` tags — check the
 [GitHub Releases page](https://github.com/coreflake1/guppyscreen/releases) for the current one
 rather than trusting a version number hardcoded in this doc, since it goes stale fast. Earlier
 pre-rename tags (`v0.1.1-ke-gui-fixes`, `v0.1.0-ke-bedmesh`, the `0.0.x-beta` series) exist further
-back in the repository history from before the `-OpenKE` naming convention.
+back in the repository history from before the `-RosetteOS` naming convention. Existing tags remain
+unchanged; RosetteOS builds consume this repository by pinned commit.
 
 ### Testing an unreleased `ke-next` build
 
@@ -88,7 +89,7 @@ CI publishes the tag with bare auto-generated notes (a commit list + changelog l
 developers, not for end users, most of whom are not developers. **After the tag build succeeds,
 replace the notes** (`gh release edit <tag> --notes-file <file>` or the GitHub web UI) with real,
 plain-language writing in the established house style — look at any past release
-(e.g. `gh release view v1.4.2-OpenKE --json body`) for the exact tone to match:
+(e.g. `gh release view v1.4.2-RosetteOS --json body`) for the exact tone to match:
 
 - A one-line `## What's new in vX.Y.Z` title, then a short plain-English summary sentence.
 - If the update needs the **full installer** (not just the in-app "Update Guppy" button) - e.g. it

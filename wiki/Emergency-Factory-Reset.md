@@ -1,8 +1,8 @@
 # Emergency Factory Reset
 
-The OpenKE installer deploys a `S58factoryreset` init service (not present in stock Creality firmware) that gives you three ways to wipe the printer back to stock.
+The RosetteOS installer deploys a `S58factoryreset` init service (not present in stock Creality firmware) that gives you three ways to wipe the printer back to stock.
 
-> **⚠️ This is destructive.** A factory reset removes all mods, configuration, print files, and calibration data. WiFi credentials and the Creality cloud account are preserved. You will need to re-run the OpenKE installer afterwards.
+> **⚠️ This is destructive.** A factory reset removes all mods, configuration, print files, and calibration data. WiFi credentials and the Creality cloud account are preserved. You will need to re-run the RosetteOS installer afterwards.
 
 ---
 
@@ -43,7 +43,7 @@ If you can SSH in but want a clean slate:
 | Path | Outcome |
 |---|---|
 | `/overlay/upper/` | **Wiped** — all system-level modifications removed |
-| `/usr/data/guppyscreen/` | **Wiped** — OpenKE binary, config, mods |
+| `/usr/data/guppyscreen/` | **Wiped** — RosetteOS binary, config, mods |
 | `/usr/data/printer_data/` | **Wiped** — Klipper config, gcodes, timelapse |
 | `/usr/data/printer_data/logs/` | **Mostly wiped** — only `guppyscreen.log`, `grumpyscreen.log`, and `factoryreset.log` survive for diagnosis; everything else in `logs/` is deleted |
 | `/usr/data/wpa_supplicant.conf` | **Kept** — WiFi credentials survive |
@@ -54,7 +54,7 @@ If you can SSH in but want a clean slate:
 
 ## After the reset
 
-The printer boots into stock Creality firmware. Re-run the OpenKE installer to get back up:
+The printer boots into stock Creality firmware. Re-run the RosetteOS installer to get back up:
 
 ```sh
 sh -c "$(wget --no-check-certificate -qO - https://raw.githubusercontent.com/coreflake1/guppyscreen/main/scripts/installer.sh)"

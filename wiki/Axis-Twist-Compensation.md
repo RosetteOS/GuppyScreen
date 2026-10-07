@@ -24,13 +24,13 @@ Your printer probes the bed before each print to build a height map (a *bed mesh
 - 🧰 **You need:** the printer on your network and a sheet of paper. No tools, no disassembly.
 - ↩️ **Safe to try:** fully reversible — see [Undoing it](#undoing-it).
 
-> ⚠️ These changes live in the printer's system files. **A Creality firmware update will erase them.** Re-run the OpenKE installer afterwards and they come back — bookmark this page.
+> ⚠️ These changes live in the printer's system files. **A Creality firmware update will erase them.** Re-run the RosetteOS installer afterwards and they come back — bookmark this page.
 
 ---
 
 ## Step 1 — Make sure the mod is installed
 
-The OpenKE installer sets this up for you during the print-quality mods step. To check, open the
+The RosetteOS installer sets this up for you during the print-quality mods step. To check, open the
 **Tune** tab on the screen — if you see an **Axis Twist** entry, you're good. Jump to Step 2.
 
 If you don't see it, re-run the [installer](Installation) and answer **Y** at the print-quality mods

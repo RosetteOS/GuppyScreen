@@ -14,7 +14,7 @@ boards; produced by CI). Dependencies are git submodules plus a vendored `wpa_su
 ## 1. Clone with submodules
 
 ```bash
-git clone --recurse-submodules https://github.com/OpenKlipperEdition/GuppyScreen.git
+git clone --recurse-submodules https://github.com/RosetteOS/GuppyScreen.git
 cd GuppyScreen
 ```
 
@@ -66,14 +66,14 @@ Output: `build/bin/guppyscreen`. See **[Development and Simulator](Development-a
 ## 4b. Cross-compile for the Nebula Pad / Ender-3 V3 KE (MIPS)
 
 Quick note before you start: this section is for standalone development. Neither this repo's CI nor
-a normal OpenKE build use the `guppydev` image below anymore — both moved to
-`OpenKE`'s unified build image (see its
-[Build Environment doc](https://github.com/OpenKlipperEdition/OpenKE/wiki/Build-Environment) and
+a normal RosetteOS build use the `guppydev` image below anymore — both moved to
+`RosetteOS`'s unified build image (see its
+[Build Environment doc](https://github.com/RosetteOS/RosetteOS/wiki/Build-Environment) and
 [CI](CI)). `guppydev` still works fine for local, standalone iteration if you'd rather not pull the
 full unified image.
 
 The MIPS toolchain ships in a container image. This repo provides its own toolchain image via
-[`docker/Dockerfile`](https://github.com/OpenKlipperEdition/GuppyScreen/blob/main/docker/Dockerfile),
+[`docker/Dockerfile`](https://github.com/RosetteOS/GuppyScreen/blob/main/docker/Dockerfile),
 published as `ghcr.io/coreflake1/guppydev`. Run the provided script **inside that container**; it
 rebuilds each dependency for MIPS and then builds GuppyScreen with `GUPPY_SMALL_SCREEN=1`:
 
@@ -99,7 +99,7 @@ docker build -t ghcr.io/coreflake1/guppydev:latest docker/
 ### The toolchain image
 
 Docker is used only to provide the cross-compilation *toolchain* (the app itself is built by `make`,
-not in a container). The image is defined by [`docker/Dockerfile`](https://github.com/OpenKlipperEdition/GuppyScreen/blob/main/docker/Dockerfile):
+not in a container). The image is defined by [`docker/Dockerfile`](https://github.com/RosetteOS/GuppyScreen/blob/main/docker/Dockerfile):
 
 - **Base:** Ubuntu 22.04 + `build-essential`, `cmake`, `git`.
 - **MIPS:** Bootlin `mips32el--musl--stable-2024.02-1` (gcc 12.3.0) — provides both the

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-# OpenKE — reload the stock Creality camera pipeline (cam_app + mjpg_streamer).
+# RosetteOS — reload the stock Creality camera pipeline (cam_app + mjpg_streamer).
 #
 # Replaces a dependency on the Creality Helper Script's own camera reload
-# (which calls into Helper Script's auto_uvc.sh — most OpenKE-only installs
+# (which calls into Helper Script's auto_uvc.sh — most RosetteOS-only installs
 # don't have it, so RELOAD_CAMERA existed on-screen but silently failed).
 #
 # Neither cam_app nor mjpg_streamer has a supervisor watching them (both run

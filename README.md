@@ -1,11 +1,11 @@
-# OpenKE GuppyScreen
+# RosetteOS GuppyScreen
 
-This is OpenKE's touchscreen UI — a KE-focused fork of
+This is RosetteOS's touchscreen UI — a KE-focused fork of
 [GuppyScreen](https://github.com/ballaswag/guppyscreen). Full print control, an interactive 3D bed
 mesh, an on-screen calibration suite, running right on the printer's display with no X11, Wayland,
 or display server involved.
 
-Originally developed as the display interface for NebulaOS, this project serves as the touchscreen UI for [OpenKE](https://github.com/OpenKlipperEdition/OpenKE), an open-source firmware distribution forked from NebulaOS that continues to use all of NebulaOS's companion Klipper extensions.
+Originally developed as the display interface for NebulaOS, this project serves as the touchscreen UI for [RosetteOS](https://github.com/RosetteOS/RosetteOS), an open-source firmware distribution forked from NebulaOS that continues to use all of NebulaOS's companion Klipper extensions.
 
 ## Features
 
@@ -24,14 +24,14 @@ Originally developed as the display interface for NebulaOS, this project serves 
 Two different workflows depending on what you're doing.
 
 **If you're just trying to build the whole OS** — use
-[`OpenKE`](https://github.com/OpenKlipperEdition/OpenKE) instead. It pins an exact
+[`RosetteOS`](https://github.com/RosetteOS/RosetteOS) instead. It pins an exact
 commit of this repo and cross-compiles + installs it automatically as part of the full image. You
 don't need to clone this repo directly for that.
 
 **If you're actually developing GuppyScreen itself:**
 
 ```bash
-git clone --recurse-submodules https://github.com/OpenKlipperEdition/GuppyScreen.git
+git clone --recurse-submodules https://github.com/RosetteOS/GuppyScreen.git
 cd GuppyScreen
 ```
 
@@ -57,14 +57,14 @@ Commit `b15ad7f` fixed a real bug where `Config::init()`/`ThemeConfig::init()` s
 in-memory defaults on every boot on read-only-squashfs setups, instead of reading your
 actual saved `config.json`/`theme.json`. No crash, just settings that quietly never stuck. We've
 since tested this on real hardware — config and theme survive a real flash now. See
-[`OpenKE`'s `manifests/dependencies.conf`](https://github.com/OpenKlipperEdition/OpenKE/blob/main/manifests/dependencies.conf)
+[`RosetteOS`'s `manifests/dependencies.conf`](https://github.com/RosetteOS/RosetteOS/blob/main/manifests/dependencies.conf)
 for the pin history.
 
 ## Documentation & Heritage
 
 Developer docs live in [`wiki/`](wiki/) and [`DEVELOPMENT.md`](DEVELOPMENT.md).
 
-OpenKE GuppyScreen traces its lineage through the NebulaOS project and early stock-firmware modding experiments, building upon upstream GuppyScreen. For full OS build and installation instructions, refer to the primary [`OpenKE`](https://github.com/OpenKlipperEdition/OpenKE) repository.
+RosetteOS GuppyScreen traces its lineage through the NebulaOS project and early stock-firmware modding experiments, building upon upstream GuppyScreen. For full OS build and installation instructions, refer to the primary [`RosetteOS`](https://github.com/RosetteOS/RosetteOS) repository.
 
 ## License & credits
 

@@ -1,8 +1,8 @@
-### 🖨️ OpenKE
+### 🖨️ RosetteOS
 
 **Get started**
 - [Home](Home)
-- [Install OpenKE](Installation)
+- [Install RosetteOS](Installation)
 - [Upgrade from older version](Upgrading)
 
 **Get great prints**
@@ -32,9 +32,9 @@
 - [Contributing](Contributing)
 - [Publishing this wiki](Wiki-Publishing)
 
-**OpenKE & NebulaOS Lineage**
-- [OpenKE relationship](OpenKE-Relationship)
-- [Integration with OpenKE](Integration-with-OpenKE)
+**RosetteOS & NebulaOS Lineage**
+- [RosetteOS relationship](RosetteOS-Relationship)
+- [Integration with RosetteOS](Integration-with-RosetteOS)
 - [CI](CI)
 - [Testing](Testing)
 - [Config and theme](Config-and-Theme)

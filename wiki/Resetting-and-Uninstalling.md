@@ -1,6 +1,6 @@
 # Resetting & Uninstalling
 
-OpenKE gives you two ways to go back to stock. They do very different things — pick the right one.
+RosetteOS gives you two ways to go back to stock. They do very different things — pick the right one.
 
 ---
 
@@ -8,15 +8,15 @@ OpenKE gives you two ways to go back to stock. They do very different things —
 
 | I want to… | Use |
 |---|---|
-| Remove OpenKE's screen and mods, but keep all my Klipper config and print files | **[Uninstall](#uninstall-openke)** |
-| Wipe everything — configs, gcodes, OpenKE, all of it — and start from zero | **[Factory reset](#factory-reset)** |
+| Remove RosetteOS's screen and mods, but keep all my Klipper config and print files | **[Uninstall](#uninstall-rosetteos)** |
+| Wipe everything — configs, gcodes, RosetteOS, all of it — and start from zero | **[Factory reset](#factory-reset)** |
 | My screen is black / SSH is dead / nothing works | **[Factory reset via USB](#method-1--usb-drive-no-ssh-required)** (works even with no screen) |
 
 ---
 
-## Uninstall OpenKE
+## Uninstall RosetteOS
 
-The uninstaller removes OpenKE's screen binary, Klipper mods, and system changes. It **keeps** your
+The uninstaller removes RosetteOS's screen binary, Klipper mods, and system changes. It **keeps** your
 Klipper config (`printer.cfg`), print files, bed meshes, and calibration data — so you can reinstall
 later without recalibrating.
 
@@ -30,7 +30,7 @@ sh -c "$(wget --no-check-certificate -qO - https://raw.githubusercontent.com/cor
 
 ### What it removes
 
-- OpenKE binary and config (`/usr/data/guppyscreen/`)
+- RosetteOS binary and config (`/usr/data/guppyscreen/`)
 - Klipper mod **config files**: adaptive print setup configs, the Axis Twist config, TMC Autotune config, Skew config.
   The underlying Python modules (`axis_twist_compensation.py`, `autotune_tmc.py`, etc.) are deliberately
   **left in place** in `klippy/extras` — removing them could break a `printer.cfg` section that still
@@ -42,7 +42,7 @@ sh -c "$(wget --no-check-certificate -qO - https://raw.githubusercontent.com/cor
 - **`probe.py`** — the uninstaller does not copy this back for you. If Axis Twist Compensation patched
   it, the original is saved at `/usr/data/guppyify-backup/probe.py.bak`; restore it yourself with
   `cp /usr/data/guppyify-backup/probe.py.bak /usr/share/klipper/klippy/extras/probe.py` if you need to.
-- **`S50dropbear`** (the SSH startup script) — this is intentional, not an oversight. OpenKE's install
+- **`S50dropbear`** (the SSH startup script) — this is intentional, not an oversight. RosetteOS's install
   replaces the stock version to fix a boot-time race that can prevent SSH from starting reliably.
   Reverting to the stock version on uninstall would bring that problem back right when you might most
   need SSH access (e.g. to reinstall). The fixed version is left in place permanently.
@@ -62,7 +62,7 @@ sh -c "$(wget --no-check-certificate -qO - https://raw.githubusercontent.com/cor
 The stock Creality screen binary comes back on the next reboot. The Klipper interface (Mainsail/Fluidd)
 still works as normal.
 
-To reinstall OpenKE later, just run the [installer](Installation) again.
+To reinstall RosetteOS later, just run the [installer](Installation) again.
 
 ---
 
@@ -72,7 +72,7 @@ A factory reset wipes the printer to exactly how it came from the factory — no
 mods. Use this only when you need a truly clean slate or the printer is in an unrecoverable state.
 
 > ⚠️ **This is destructive and not reversible.** Your Klipper config, print files, calibration data, and
-> all OpenKE mods are gone. WiFi credentials and the Creality cloud account are preserved.
+> all RosetteOS mods are gone. WiFi credentials and the Creality cloud account are preserved.
 
 ### Method 1 — USB drive (no SSH required)
 
@@ -104,7 +104,7 @@ Open **Settings → System → Reset Options → Factory Reset Printer** → red
 | Path | Outcome |
 |---|---|
 | `/overlay/upper/` | **Wiped** — all system-level modifications removed |
-| `/usr/data/guppyscreen/` | **Wiped** — OpenKE binary and config |
+| `/usr/data/guppyscreen/` | **Wiped** — RosetteOS binary and config |
 | `/usr/data/printer_data/` | **Wiped** — Klipper config, gcodes, calibration |
 | `/usr/data/printer_data/logs/` | **Mostly wiped** — only 3 specific files survive: `guppyscreen.log`, `grumpyscreen.log`, and `factoryreset.log`. Everything else in `logs/` is deleted. |
 | `/usr/data/wpa_supplicant.conf` | **Kept** — WiFi credentials survive |
@@ -112,7 +112,7 @@ Open **Settings → System → Reset Options → Factory Reset Printer** → red
 
 ### After the reset
 
-The printer boots into stock Creality firmware. To get OpenKE back:
+The printer boots into stock Creality firmware. To get RosetteOS back:
 
 ```sh
 sh -c "$(wget --no-check-certificate -qO - https://raw.githubusercontent.com/coreflake1/guppyscreen/main/scripts/installer.sh)"

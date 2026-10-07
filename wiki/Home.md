@@ -1,13 +1,13 @@
-> **OpenKE GuppyScreen** is the dedicated touchscreen interface for the **OpenKE** operating system ([OpenKlipperEdition](https://github.com/OpenKlipperEdition)).
-> OpenKE is an open-source fork of NebulaOS that integrates GuppyScreen natively into the dual-slot A/B system image and continues to use all companion NebulaOS Klipper extensions (`NebulaOS-klipper-extensions`).
-> This repository is pinned and built directly by [`OpenKE`](https://github.com/OpenKlipperEdition/OpenKE). For complete operating system builds and installation guides, refer to the primary [OpenKE repository](https://github.com/OpenKlipperEdition/OpenKE).
+> **GuppyScreen** is the dedicated touchscreen interface for **RosetteOS** ([RosetteOS](https://github.com/RosetteOS/RosetteOS)).
+> RosetteOS integrates GuppyScreen natively into the dual-slot A/B system image and continues to use the companion NebulaOS Klipper extensions (`NebulaOS-klipper-extensions`).
+> This repository is pinned and built directly by RosetteOS. For complete operating system builds and installation guides, use the [RosetteOS firmware repository](https://github.com/RosetteOS/RosetteOS).
 
-# OpenKE — perfect prints on the Ender-3 V3 KE
+# RosetteOS — perfect prints on the Ender-3 V3 KE
 
 So you've got a **Creality Ender-3 V3 KE** and you want it to print *really* well — clean first layers,
-square parts, quiet motors, no babysitting. That's the whole point of OpenKE.
+square parts, quiet motors, no babysitting. That's the whole point of RosetteOS.
 
-OpenKE is three things in one project:
+RosetteOS brings three things together:
 
 1. **A better screen.** A fast touch UI that replaces the stock interface — full print control, an
    interactive 3D bed mesh you can spin around, and an on-screen calibration suite. It runs right on the
@@ -19,14 +19,14 @@ OpenKE is three things in one project:
 3. **Guides that explain the *why*.** Not just "tap this button" — *when* to recalibrate, what each
    tool fixes, and how to chase down a specific print problem.
 
-> **Heads-up on the name:** this project used to be called **GuppyKE** and is now **OpenKE**. Recent
-> releases are tagged `vX.Y-OpenKE` (older ones were `vX.Y-GuppyKE`), and you'll still see `GuppyKE` in
+> **Heads-up on the name:** this project used to be called **GuppyKE** and **RosetteOS**, and is now **RosetteOS**. Existing
+> release tags retain their historical names (`vX.Y-RosetteOS` and older `vX.Y-GuppyKE`), and you'll still see `GuppyKE` in
 > a few file names — same project. **Already running an older version?** See
 > [Upgrading from an older version](Upgrading).
 
 ## New here? Do this
 
-1. **[Install OpenKE](Installation)** — one command over SSH, keeps your config (and backs it up).
+1. **[Install RosetteOS](Installation)** — one command over SSH, keeps your config (and backs it up).
 2. **[Take the screen tour](Using-GuppyKE)** — every panel, every setting, explained for newcomers.
 3. **[Calibrate your printer](Calibration-Explained)** — the short path from "it prints" to "it
    prints *well*."
@@ -61,7 +61,7 @@ your problem:
 
 ## Will it run on my printer?
 
-OpenKE is built for the **Creality Nebula Pad** hardware platform (powered by the Ingenic XBurst2 X2000 MIPS SoC).
+RosetteOS is built for the **Creality Nebula Pad** hardware platform (powered by the Ingenic XBurst2 X2000 MIPS SoC).
 
 | | |
 |---|---|
@@ -71,7 +71,7 @@ OpenKE is built for the **Creality Nebula Pad** hardware platform (powered by th
 | **Chip / arch** | Ingenic XBurst2 X2000 — **MIPS (mipsel)**, *not* aarch64 |
 | **Display** | 480×272 touchscreen |
 
-The operating system runs directly on the Nebula Pad, with the Ender-3 V3 KE serving as the primary development and reference baseline. OpenKE includes a multi-printer profile manager designed to support the entire family of printers that Creality's Nebula Smart Kit targets. The code can also build for other screens and an x86 SDL simulator for development.
+The operating system runs directly on the Nebula Pad, with the Ender-3 V3 KE serving as the primary development and reference baseline. RosetteOS includes a multi-printer profile manager designed to support the entire family of printers that Creality's Nebula Smart Kit targets. The code can also build for other screens and an x86 SDL simulator for development.
 
 ## Building it / contributing
 

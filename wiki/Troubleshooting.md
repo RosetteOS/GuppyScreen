@@ -122,7 +122,7 @@ Then restart: `/etc/init.d/S99guppyscreen restart`.
   accumulate forever on stock Klipper (133+ files / going back over a year is normal on an
   unmaintained printer). Current installs add a small recurring cleanup service (runs at boot)
   that rotates these down to just the single newest one past a 7-day grace period, does the same
-  for OpenKE's own install-time config backups, clears old rotated log files, and (only if free
+  for RosetteOS's own install-time config backups, clears old rotated log files, and (only if free
   space drops below 1 GB) removes gcode files older than 7 days. No action needed, nothing to
   configure, and it never touches anything less than a week old or any one-time named
   backup/restore file. If you're on an older install and seeing storage fill up, re-run the

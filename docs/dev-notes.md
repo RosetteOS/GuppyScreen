@@ -3,12 +3,12 @@
 > **This is a point-in-time snapshot from the initial KE port, not maintained current
 > documentation.** A lot of it is still accurate as mechanism/background reference (font tuning,
 > display rotation, the backup-directory layout, why `S50dropbear`'s start case matters), but
-> some specifics below are superseded — notably the Docker image and Helper Script's role (OpenKE
+> some specifics below are superseded — notably the Docker image and Helper Script's role (RosetteOS
 > is now fully independent of Helper Script, see [[project_helper_script_independence_audit]] in
 > the project memory, or `git log` for `scripts/installer.sh`). **For current, maintained build/
 > install/vendoring docs, use these instead:**
 > - [Building from Source](../wiki/Building-from-Source.md) — the GuppyScreen binary itself
-> - [`docs/VENDORING.md`](VENDORING.md) — how to build every vendored package OpenKE ships
+> - [`docs/VENDORING.md`](VENDORING.md) — how to build every vendored package RosetteOS ships
 > - [Installation](../wiki/Installation.md) / [Releases and Deployment](../wiki/Releases-and-Deployment.md)
 
 Accumulated discoveries from building and packaging this branch for the Ender-3 V3 KE.
