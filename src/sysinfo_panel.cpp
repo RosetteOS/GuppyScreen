@@ -437,7 +437,7 @@ void SysInfoPanel::foreground() {
     network_detail.push_back(fmt::format("\t{}: {}", iface, ip));
   }
   std::string active_slot = KUtils::get_active_slot_num();
-  lv_label_set_text(network_label, fmt::format("{}\n\nSystem\n\tRosetteOS: v" ROSETTEOS_VER_STR,
+  lv_label_set_text(network_label, fmt::format("{}\n\nSystem\n\tActive Slot: {}\n\tRosetteOS: v" ROSETTEOS_VER_STR,
     fmt::join(network_detail, "\n"), active_slot).c_str());
 }
 
