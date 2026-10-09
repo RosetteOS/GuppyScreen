@@ -571,8 +571,9 @@ void WifiPanel::handle_wpa_event(const std::string &event) {
 
     if (!cur_network.empty()) {
       auto ip = KUtils::interface_ip(KUtils::get_wifi_interface());
-      lv_label_set_text(wifi_label, fmt::format("Connected to network {}\nIP: {}",
-        cur_network, ip).c_str());
+      auto mdns = KUtils::get_mdns_hostname();
+      lv_label_set_text(wifi_label, fmt::format("Connected to network {}\nIP: {} ({})",
+        cur_network, ip, mdns).c_str());
       lv_obj_add_flag(pw_row, LV_OBJ_FLAG_HIDDEN);
       lv_obj_clear_flag(prompt_cont, LV_OBJ_FLAG_HIDDEN);
     }
@@ -698,9 +699,10 @@ void WifiPanel::wait_for_connectivity(const std::string &iface,
   }
   if (conn_gen.load() != gen || entering_password) return;
   auto ip = KUtils::interface_ip(iface);
+  auto mdns = KUtils::get_mdns_hostname();
   std::lock_guard<std::mutex> lock(lv_lock);
   lv_label_set_text(wifi_label,
-    fmt::format("Connected to {}\nIP: {}", net, ip).c_str());
+    fmt::format("Connected to {}\nIP: {} ({})", net, ip, mdns).c_str());
 }
 
 void WifiPanel::handle_eye_btn(lv_event_t *e) {

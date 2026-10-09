@@ -426,6 +426,14 @@ namespace KUtils {
     return ip;
   }
 
+  std::string get_mdns_hostname() {
+    char hostname[256] = {0};
+    if (gethostname(hostname, sizeof(hostname)) == 0 && hostname[0] != '\0') {
+      return std::string(hostname) + ".local";
+    }
+    return "rosetteos.local";
+  }
+
   std::string get_wifi_interface() {
     std::string wpa_socket = Config::get_instance()->get<std::string>("/wpa_supplicant");
     if (fs::is_directory(fs::status(wpa_socket))) {

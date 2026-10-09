@@ -20,6 +20,9 @@ namespace KUtils {
   std::string get_active_slot_name();
   std::string get_active_slot_num();
 
+  // Local mDNS hostname resolution (e.g. rosetteos.local)
+  std::string get_mdns_hostname();
+
   // GuppyScreen service restart with fallback
   bool restart_guppyscreen();
 

@@ -113,9 +113,16 @@ wpaclient:
 ## cross-compile: these always build with the plain host g++ regardless of CROSS_COMPILE,
 ## since they're meant to run right here, not on the printer. See tests/minitest.h and
 ## docs/z_compensate_status_api.md.
-.PHONY: test test-z-compensate-status test-z-offset-persistence test-contract-fixture test-integration-harness test-subscription-baseline-ordering test-config-theme-parse-safety test-wifi-credentials test-appstore-catalog
+.PHONY: test test-z-compensate-status test-z-offset-persistence test-contract-fixture test-integration-harness test-subscription-baseline-ordering test-config-theme-parse-safety test-wifi-credentials test-appstore-catalog test-mdns
 
-test: test-z-compensate-status test-z-offset-persistence test-contract-fixture test-integration-harness test-subscription-baseline-ordering test-config-theme-parse-safety test-wifi-credentials test-appstore-catalog
+test: test-z-compensate-status test-z-offset-persistence test-contract-fixture test-integration-harness test-subscription-baseline-ordering test-config-theme-parse-safety test-wifi-credentials test-appstore-catalog test-mdns
+
+test-mdns:
+	@mkdir -p build
+	g++ -std=c++17 -Wall -Wextra -I. \
+		tests/test_mdns.cpp \
+		-o build/test_mdns
+	./build/test_mdns
 
 test-wifi-credentials:
 	@mkdir -p build

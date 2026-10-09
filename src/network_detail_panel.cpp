@@ -1,4 +1,5 @@
 #include "network_detail_panel.h"
+#include "utils.h"
 #include "spdlog/spdlog.h"
 
 LV_IMG_DECLARE(back);
@@ -38,6 +39,7 @@ NetworkDetailPanel::NetworkDetailPanel(std::mutex &l,
   , signal_val(nullptr)
   , security_val(nullptr)
   , ip_val(nullptr)
+  , mdns_val(nullptr)
   , configure_btn(lv_btn_create(cont))
   , forget_btn(lv_btn_create(cont))
   , back_btn(cont, &back, "Back", &NetworkDetailPanel::_handle_back_btn, this)
@@ -63,6 +65,7 @@ NetworkDetailPanel::NetworkDetailPanel(std::mutex &l,
   make_info_row(info_card, "Signal", &signal_val);
   make_info_row(info_card, "Security", &security_val);
   make_info_row(info_card, "IP address", &ip_val);
+  make_info_row(info_card, "mDNS address", &mdns_val);
 
   // Fixed width, not 100% - the floating Back button is a 110px-wide box
   // pinned to the bottom-right corner (button_container.cpp), and a
@@ -110,6 +113,7 @@ void NetworkDetailPanel::foreground(const std::string &ssid,
   lv_label_set_text(signal_val, signal_text.c_str());
   lv_label_set_text(security_val, security_text.c_str());
   lv_label_set_text(ip_val, ip_text.c_str());
+  lv_label_set_text(mdns_val, KUtils::get_mdns_hostname().c_str());
   lv_obj_move_foreground(cont);
 }
 

@@ -44,6 +44,7 @@ private:
   lv_obj_t *signal_val;
   lv_obj_t *security_val;
   lv_obj_t *ip_val;
+  lv_obj_t *mdns_val;
   lv_obj_t *configure_btn;
   lv_obj_t *forget_btn;
   ButtonContainer back_btn;
