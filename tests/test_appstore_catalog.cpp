@@ -30,7 +30,25 @@ struct TestAppItem {
 };
 
 TEST(AppStoreCatalog, parses_manifest_json_correctly) {
-  std::ifstream f("../RosetteOS/manifests/apps.json");
+  const char *manifest_paths[] = {
+    "../manifests/apps.json",
+    "../RosetteOS/manifests/apps.json",
+    "../../RosetteOS/manifests/apps.json",
+    "/root/Development/RosetteOS/RosetteOS/manifests/apps.json"
+  };
+
+  std::string found_path = "";
+  for (const auto *p : manifest_paths) {
+    std::ifstream check(p);
+    if (check.good()) {
+      found_path = p;
+      break;
+    }
+  }
+
+  ASSERT_TRUE(!found_path.empty());
+
+  std::ifstream f(found_path);
   ASSERT_TRUE(f.good());
   json data;
   f >> data;

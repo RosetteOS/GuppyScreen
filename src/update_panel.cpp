@@ -324,12 +324,13 @@ static void scan_remote_repo(std::vector<UpdatePackageItem> &packages, const std
 
   std::string cmd = "curl -s -f -k -m 4 -L '" + manifest_url + "' -o '" + tmp_manifest + "' 2>/dev/null";
   int rc = system(cmd.c_str());
+  const std::string search_target = "/RosetteOS/RosetteOS/main/";
   if ((rc != 0 || !fs::exists(tmp_manifest) || fs::file_size(tmp_manifest) == 0) &&
-      manifest_url.find("/RosetteOS/RosetteOS/main/") != std::string::npos) {
+      manifest_url.find(search_target) != std::string::npos) {
     std::string fallback_url = manifest_url;
-    size_t pos = fallback_url.find("/RosetteOS/RosetteOS/main/");
+    size_t pos = fallback_url.find(search_target);
     if (pos != std::string::npos) {
-      fallback_url.replace(pos, 32, "/RosetteOS/RosetteOS/brupdate/");
+      fallback_url.replace(pos, search_target.length(), "/RosetteOS/RosetteOS/brupdate/");
       cmd = "curl -s -f -k -m 4 -L '" + fallback_url + "' -o '" + tmp_manifest + "' 2>/dev/null";
       rc = system(cmd.c_str());
     }
