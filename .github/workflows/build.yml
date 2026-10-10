@@ -2,9 +2,11 @@ name: guppy build
 
 on:
   push:
-    branches: [ "main", "develop", "ke-next" ]
+    branches: [ "main", "develop", "ke-next", "rosetteos-rebrand" ]
     tags:
       - "*"
+  pull_request:
+    branches: [ "main", "develop", "rosetteos-rebrand" ]
   workflow_dispatch: {}
 
 permissions:
@@ -28,7 +30,7 @@ jobs:
     container:
       # Migrated to the same digest-pinned image RosetteOS's own build.sh uses
       # (see manifests/dependencies.conf BUILD_IMAGE_REPO/BUILD_IMAGE_DIGEST).
-      image: ghcr.io/rosetteos/rosetteos-build@sha256:6881c505c5d94c82c755cd54ffd97877977619d1ccaab2b3c7d68c94c52eb93a
+      image: ghcr.io/rosetteos/rosetteos-build@sha256:cc8bd43f8d0dbb96ac305b13ff6793d37f39e7a9eb9e70e29e316fee4588764d
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}

@@ -2,27 +2,25 @@ name: validate pull request
 
 on:
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "rosetteos-rebrand" ]
 
 jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Install test dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake g++ libstdc++-12-dev
+      - name: Run host unit tests
+        run: make test
+
   build:
+    needs: test
     strategy:
       matrix:
         include:
-          - arch: mipsel-buildroot-linux-musl-
-            theme: zbolt
-            small: false
-            rotate: true
-            calibrate: false
-            asset: guppyscreen-zbolt
-
-          - arch: mipsel-buildroot-linux-musl-
-            theme: material
-            small: false
-            rotate: true
-            calibrate: false
-            asset: guppyscreen
-
           - arch: mipsel-buildroot-linux-musl-
             theme: material
             small: true
@@ -30,16 +28,12 @@ jobs:
             calibrate: true
             asset: guppyscreen-smallscreen
 
-          - arch: aarch64-none-linux-gnu-
-            theme: material
-            small: false
-            rotate: false
-            calibrate: true
-            asset: guppyscreen-arm
-
     runs-on: ubuntu-22.04
     container:
-      image: ballaswag/guppydev:latest
+      image: ghcr.io/rosetteos/rosetteos-build@sha256:cc8bd43f8d0dbb96ac305b13ff6793d37f39e7a9eb9e70e29e316fee4588764d
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
       options: --user 1001
 
     env:
@@ -47,6 +41,8 @@ jobs:
       CC: ${{ matrix.arch }}
       CXX: ${{ matrix.arch }}
       GUPPY_THEME: ${{ matrix.theme }}
+      HOME: /tmp
+      PATH: /toolchains/mips32el--musl--stable-2024.02-1/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
     steps:
     - uses: actions/checkout@v6
