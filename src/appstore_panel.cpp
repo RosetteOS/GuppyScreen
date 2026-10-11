@@ -100,8 +100,6 @@ static const void *get_app_icon(const AppItem &app) {
 
 static const char *DEFAULT_CATALOG_PATHS[] = {
   "/usr/data/rosetteos/apps.json",
-  "/usr/data/rosetteos-seeds/apps.json",
-  "/opt/rosetteos-seeds/apps.json",
   "/opt/rosetteos/apps.json",
   "/etc/rosetteos/apps.json",
   "/etc/rosetteos-apps.json",
@@ -477,9 +475,11 @@ void AppStorePanel::foreground() {
   build_app_list();
   lv_obj_move_foreground(cont);
 
-  // First open after install/upgrade: pull the catalog (and with it the app logos) once.
+  // Pull the catalog (and with it the app logos) whenever no catalog exists yet,
+  // or once on first open if icons haven't been cached.
   static bool icons_requested = false;
-  if (!icons_requested && !app_icon_valid("/usr/data/rosetteos/icons/mainsail.png")) {
+  bool catalog_missing = !fs::exists("/usr/data/rosetteos/apps.json");
+  if (catalog_missing || (!icons_requested && !app_icon_valid("/usr/data/rosetteos/icons/mainsail.png"))) {
     icons_requested = true;
     execute_refresh();
   }

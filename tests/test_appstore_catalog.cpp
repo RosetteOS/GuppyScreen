@@ -31,10 +31,12 @@ struct TestAppItem {
 
 TEST(AppStoreCatalog, parses_manifest_json_correctly) {
   const char *manifest_paths[] = {
-    "../manifests/apps.json",
-    "../RosetteOS/manifests/apps.json",
-    "../../RosetteOS/manifests/apps.json",
-    "/root/Development/RosetteOS/RosetteOS/manifests/apps.json"
+    "../AppStore/dist/apps.json",
+    "../../AppStore/dist/apps.json",
+    "/root/Development/RosetteOS/AppStore/dist/apps.json",
+    "../AppStore/apps.json",
+    "../../AppStore/apps.json",
+    "/root/Development/RosetteOS/AppStore/apps.json"
   };
 
   std::string found_path = "";
