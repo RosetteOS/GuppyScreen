@@ -25,6 +25,7 @@ struct AppItem {
   std::string installed_version;
   std::string author;
   std::string description;
+  std::string latest_changelog;
   bool is_builtin{false};
   bool is_installed{false};
   bool is_active{false};

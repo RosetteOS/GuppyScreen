@@ -583,6 +583,18 @@ void AppStorePanel::refresh_apps() {
           app.version = item.value("version", "");
           app.author = item.value("author", "");
           app.description = item.value("description", "");
+          app.latest_changelog = item.value("latest_changelog", "");
+          if (app.latest_changelog.empty() && item.contains("changelog") && item["changelog"].is_array() && !item["changelog"].empty()) {
+            const auto &first_cl = item["changelog"][0];
+            if (first_cl.is_object() && first_cl.contains("changes") && first_cl["changes"].is_array()) {
+              for (const auto &c : first_cl["changes"]) {
+                if (c.is_string()) {
+                  if (!app.latest_changelog.empty()) app.latest_changelog += "\n";
+                  app.latest_changelog += "• " + c.get<std::string>();
+                }
+              }
+            }
+          }
           app.is_builtin = item.value("is_builtin", false);
           app.is_installed = item.value("is_installed", false);
           app.is_active = item.value("is_active", false);
@@ -643,6 +655,18 @@ void AppStorePanel::refresh_apps() {
               app.installed_version = item.value("installed_version", "");
               app.author = item.value("author", "");
               app.description = item.value("description", "");
+              app.latest_changelog = item.value("latest_changelog", "");
+              if (app.latest_changelog.empty() && item.contains("changelog") && item["changelog"].is_array() && !item["changelog"].empty()) {
+                const auto &first_cl = item["changelog"][0];
+                if (first_cl.is_object() && first_cl.contains("changes") && first_cl["changes"].is_array()) {
+                  for (const auto &c : first_cl["changes"]) {
+                    if (c.is_string()) {
+                      if (!app.latest_changelog.empty()) app.latest_changelog += "\n";
+                      app.latest_changelog += "• " + c.get<std::string>();
+                    }
+                  }
+                }
+              }
               app.is_builtin = item.value("is_builtin", false);
 
               // Check if installed via metadata, probe_path, or apps directory
@@ -1232,8 +1256,11 @@ void AppStorePanel::show_update_confirm(const AppItem &app) {
   pending_app = app;
 
   static const char *btns[] = {"Cancel", "Update", ""};
+  std::string body_notes = !app.latest_changelog.empty()
+      ? fmt::format("#64B5F6 What's New in v{}:#\n{}", app.version, app.latest_changelog)
+      : app.description;
   std::string msg = fmt::format("Update\n#FFA726 {}#\nfrom #BDBDBD v{}# -> #4CAF50 v{}# ?\n\n{}",
-                                app.name, app.installed_version.empty() ? "?" : app.installed_version, app.version, app.description);
+                                app.name, app.installed_version.empty() ? "?" : app.installed_version, app.version, body_notes);
 
   lv_obj_t *mbox = lv_msgbox_create(NULL, NULL, msg.c_str(), btns, false);
   KUtils::style_dialog_msgbox(mbox);
