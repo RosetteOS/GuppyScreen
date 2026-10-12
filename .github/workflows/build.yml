@@ -2,11 +2,11 @@ name: guppy build
 
 on:
   push:
-    branches: [ "main", "develop", "ke-next", "rosetteos-rebrand" ]
+    branches: [ "main", "develop", "ke-next" ]
     tags:
       - "*"
   pull_request:
-    branches: [ "main", "develop", "rosetteos-rebrand" ]
+    branches: [ "main", "develop" ]
   workflow_dispatch: {}
 
 permissions:

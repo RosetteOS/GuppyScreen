@@ -1,7 +1,7 @@
 name: Publish wiki
 on:
   push:
-    branches: [main, rosetteos-rebrand]
+    branches: [main]
     paths: ['wiki/**']
 permissions:
   contents: write
