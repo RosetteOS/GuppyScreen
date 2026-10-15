@@ -600,7 +600,7 @@ void SysInfoPanel::show_reset_options() {
   lv_obj_t *btn2 = make_opt_btn(
     "Factory Reset Printer",
     have_factory_reset
-      ? "Formats data partition, resets all configs and\ncalibration. Reboots into fresh RosetteOS."
+      ? "Erases all print files, settings, Wi-Fi, and\ncalibration. Restores printer to factory defaults."
       : "Not available on this build - RosetteOS has\nno factory-reset/recovery script yet."
   );
   if (!have_factory_reset) {
@@ -651,7 +651,7 @@ void SysInfoPanel::show_reset_options() {
     if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
     ((SysInfoPanel *)e->user_data)->show_reset_confirm(
       "Factory Reset Printer?",
-      "Formats mmcblk0p10 data partition, clears all\nconfigs, gcodes, and calibration data.\nReboots into fresh RosetteOS.\n\nThis cannot be undone.",
+      "This will erase all print files, saved Wi-Fi\nnetworks, Klipper settings, and calibration.\nYour printer will restart with factory defaults.\n\nThis cannot be undone.",
       []() {
         spdlog::warn("Factory reset printer: executing S58factoryreset reset");
         system("/etc/init.d/S58factoryreset reset");
