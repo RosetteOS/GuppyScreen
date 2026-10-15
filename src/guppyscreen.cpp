@@ -64,7 +64,7 @@ GuppyScreen *GuppyScreen::init(std::function<void(lv_color_t, lv_color_t)> hal_i
       : conf->get<std::string>(ll_path));
 
   auto selected_theme = conf->get_json("/theme").empty()
-          ? "blue.json"
+          ? "red.json"
           : conf->get<std::string>("/theme") + ".json";
   auto theme_config = fs::canonical(conf->get_path()).parent_path() / "themes" / selected_theme;
 
