@@ -877,10 +877,12 @@ void UpdatePanel::build_package_list() {
     lv_obj_t *btn = lv_btn_create(card);
     lv_obj_set_size(btn, 110, 42);
     lv_obj_align(btn, LV_ALIGN_RIGHT_MID, 0, 0);
-    if (pkg.version_diff > 0) {
+    if (pkg.is_remote) {
+      lv_obj_set_style_bg_color(btn, lv_theme_get_color_primary(btn), 0);
+    } else if (pkg.version_diff > 0) {
       lv_obj_set_style_bg_color(btn, lv_palette_main(LV_PALETTE_GREEN), 0);
     } else {
-      lv_obj_set_style_bg_color(btn, lv_palette_main(LV_PALETTE_BLUE), 0);
+      lv_obj_set_style_bg_color(btn, lv_theme_get_color_primary(btn), 0);
     }
     lv_obj_set_style_radius(btn, 6, 0);
 
@@ -1265,7 +1267,10 @@ void UpdatePanel::show_confirmation_modal(const UpdatePackageItem &pkg) {
   lv_obj_t *confirm_btn = lv_btn_create(card);
   lv_obj_set_size(confirm_btn, 160, 44);
   lv_obj_align(confirm_btn, LV_ALIGN_BOTTOM_RIGHT, -10, 0);
-  lv_obj_set_style_bg_color(confirm_btn, blocked ? lv_palette_darken(LV_PALETTE_GREY, 3) : lv_palette_main(LV_PALETTE_GREEN), 0);
+  lv_color_t confirm_color = blocked
+    ? lv_palette_darken(LV_PALETTE_GREY, 3)
+    : (pkg.is_remote ? lv_theme_get_color_primary(confirm_btn) : lv_palette_main(LV_PALETTE_GREEN));
+  lv_obj_set_style_bg_color(confirm_btn, confirm_color, 0);
   if (blocked) {
     lv_obj_add_state(confirm_btn, LV_STATE_DISABLED);
   }
