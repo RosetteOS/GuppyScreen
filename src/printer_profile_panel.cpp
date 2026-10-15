@@ -309,6 +309,7 @@ void PrinterProfilePanel::build_profile_list() {
 }
 
 void PrinterProfilePanel::show_switch_confirm(const PrinterProfileItem &profile) {
+  if (!KUtils::check_maintenance_guard("switch printer model")) return;
   pending_profile = profile;
   static const char *btns[] = {"Cancel", "Apply & Restart", ""};
 
@@ -394,6 +395,7 @@ void PrinterProfilePanel::show_switch_confirm(const PrinterProfileItem &profile)
 }
 
 void PrinterProfilePanel::select_profile(const PrinterProfileItem &profile) {
+  if (!KUtils::check_maintenance_guard("switch printer model")) return;
   spdlog::info("Applying printer profile: {} ({})", profile.name, profile.id);
 
   std::string cmd = fmt::format("/usr/bin/rosetteos-profile set {} --restart", profile.id);
@@ -404,7 +406,7 @@ void PrinterProfilePanel::select_profile(const PrinterProfileItem &profile) {
     std::string err_msg = fmt::format(
       "#FF5252 Cannot Switch Profile#\n\n"
       "Profile change was blocked.\n"
-      "Ensure no print job is currently running or paused."
+      "Ensure no print job is running and heaters are not active or hot."
     );
     lv_obj_t *mbox = lv_msgbox_create(NULL, NULL, err_msg.c_str(), err_btns, false);
     KUtils::style_dialog_msgbox(mbox);

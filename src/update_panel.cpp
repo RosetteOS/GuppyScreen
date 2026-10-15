@@ -1144,6 +1144,8 @@ void UpdatePanel::show_confirmation_modal(const UpdatePackageItem &pkg) {
 
   bool slot2_active = KUtils::is_slot2_active();
   bool printing = KUtils::is_printing();
+  bool hot = KUtils::is_hot();
+  bool blocked = printing || hot;
   std::string active_slot = slot2_active ? "Slot 2" : "Slot 1";
   std::string target_slot = slot2_active ? "Slot 1" : "Slot 2";
 
@@ -1217,6 +1219,8 @@ void UpdatePanel::show_confirmation_modal(const UpdatePackageItem &pkg) {
                           "• Source: " + pkg.location_tag;
   if (printing) {
     info_text += "\n\n[LOCKED] Printer is currently active! Flashing is blocked.";
+  } else if (hot) {
+    info_text += "\n\n[LOCKED] Heaters are active or hot! Flashing is blocked until cool.";
   }
   lv_label_set_text(desc, info_text.c_str());
   lv_obj_set_style_text_font(desc, &lv_font_montserrat_12, 0);
@@ -1261,13 +1265,15 @@ void UpdatePanel::show_confirmation_modal(const UpdatePackageItem &pkg) {
   lv_obj_t *confirm_btn = lv_btn_create(card);
   lv_obj_set_size(confirm_btn, 160, 44);
   lv_obj_align(confirm_btn, LV_ALIGN_BOTTOM_RIGHT, -10, 0);
-  lv_obj_set_style_bg_color(confirm_btn, printing ? lv_palette_darken(LV_PALETTE_GREY, 3) : lv_palette_main(LV_PALETTE_GREEN), 0);
-  if (printing) {
+  lv_obj_set_style_bg_color(confirm_btn, blocked ? lv_palette_darken(LV_PALETTE_GREY, 3) : lv_palette_main(LV_PALETTE_GREEN), 0);
+  if (blocked) {
     lv_obj_add_state(confirm_btn, LV_STATE_DISABLED);
   }
   lv_obj_t *confirm_lbl = lv_label_create(confirm_btn);
   if (printing) {
     lv_label_set_text(confirm_lbl, "Busy (Printing)");
+  } else if (hot) {
+    lv_label_set_text(confirm_lbl, "Busy (Cooling)");
   } else if (pkg.is_remote) {
     lv_label_set_text(confirm_lbl, "Download & Flash");
   } else {
@@ -1277,8 +1283,7 @@ void UpdatePanel::show_confirmation_modal(const UpdatePackageItem &pkg) {
 
   lv_obj_add_event_cb(confirm_btn, [](lv_event_t *e) {
     auto *self = static_cast<UpdatePanel*>(e->user_data);
-    if (KUtils::is_printing()) {
-      KUtils::notify_locked();
+    if (!KUtils::check_maintenance_guard("perform firmware update")) {
       return;
     }
     self->start_update(self->selected_package);
@@ -1376,8 +1381,7 @@ void UpdatePanel::show_progress_view(const UpdatePackageItem &pkg) {
 }
 
 void UpdatePanel::start_update(const UpdatePackageItem &pkg) {
-  if (KUtils::is_printing()) {
-    KUtils::notify_locked();
+  if (!KUtils::check_maintenance_guard("perform firmware update")) {
     close_modal();
     return;
   }

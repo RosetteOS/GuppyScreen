@@ -88,6 +88,47 @@ namespace KUtils {
     return false;
   }
 
+  bool is_hot(std::string *details) {
+    auto s = State::get_instance();
+    if (!s) return false;
+
+    auto etarget_j = s->get_data("/printer_state/extruder/target"_json_pointer);
+    auto etemp_j   = s->get_data("/printer_state/extruder/temperature"_json_pointer);
+    auto btarget_j = s->get_data("/printer_state/heater_bed/target"_json_pointer);
+    auto btemp_j   = s->get_data("/printer_state/heater_bed/temperature"_json_pointer);
+
+    double etarget = etarget_j.is_number() ? etarget_j.template get<double>() : 0.0;
+    double etemp   = etemp_j.is_number()   ? etemp_j.template get<double>()   : 0.0;
+    double btarget = btarget_j.is_number() ? btarget_j.template get<double>() : 0.0;
+    double btemp   = btemp_j.is_number()   ? btemp_j.template get<double>()   : 0.0;
+
+    std::vector<std::string> msgs;
+    if (etarget > 0.0) {
+      msgs.push_back(fmt::format("Hotend heating: {:.0f}/{:.0f}°C", etemp, etarget));
+    } else if (etemp > 60.0) {
+      msgs.push_back(fmt::format("Hotend is hot: {:.1f}°C (> 60°C)", etemp));
+    }
+
+    if (btarget > 0.0) {
+      msgs.push_back(fmt::format("Bed heating: {:.0f}/{:.0f}°C", btemp, btarget));
+    } else if (btemp > 55.0) {
+      msgs.push_back(fmt::format("Bed is hot: {:.1f}°C (> 55°C)", btemp));
+    }
+
+    if (!msgs.empty()) {
+      if (details) {
+        std::string d;
+        for (size_t i = 0; i < msgs.size(); ++i) {
+          if (i > 0) d += "\n";
+          d += msgs[i];
+        }
+        *details = d;
+      }
+      return true;
+    }
+    return false;
+  }
+
   void style_dialog_overlay(lv_obj_t *overlay) {
     lv_obj_set_size(overlay, LV_PCT(100), LV_PCT(100));
     lv_obj_clear_flag(overlay, LV_OBJ_FLAG_SCROLLABLE);
@@ -168,6 +209,48 @@ namespace KUtils {
       lv_msgbox_close(lv_obj_get_parent(lv_event_get_target(e)));
     }, LV_EVENT_VALUE_CHANGED, NULL);
     style_lock_mbox(mbox, 50);
+  }
+
+  bool check_maintenance_guard(const std::string &action_name) {
+    if (is_printing()) {
+      static const char *btns[] = {"OK", ""};
+      std::string msg = fmt::format(
+        "#FF5252 Print In Progress#\n\n"
+        "Cannot {} while a 3D print job is active or paused.\n\n"
+        "Please finish or cancel the print first.",
+        action_name
+      );
+      lv_obj_t *mbox = lv_msgbox_create(NULL, NULL, msg.c_str(), btns, false);
+      lv_obj_t *txt = ((lv_msgbox_t *)mbox)->text;
+      lv_label_set_recolor(txt, true);
+      lv_obj_add_event_cb(mbox, [](lv_event_t *e) {
+        lv_msgbox_close(lv_obj_get_parent(lv_event_get_target(e)));
+      }, LV_EVENT_VALUE_CHANGED, NULL);
+      style_lock_mbox(mbox, 50);
+      return false;
+    }
+
+    std::string thermal_info;
+    if (is_hot(&thermal_info)) {
+      static const char *btns[] = {"OK", ""};
+      std::string msg = fmt::format(
+        "#FFA726 Heaters Active or Hot#\n\n"
+        "{}\n\n"
+        "#FFA726 Thermal Safety:# Cannot {} while heaters are active or cooling.\n\n"
+        "Please turn off heaters and wait for cooldown.",
+        thermal_info, action_name
+      );
+      lv_obj_t *mbox = lv_msgbox_create(NULL, NULL, msg.c_str(), btns, false);
+      lv_obj_t *txt = ((lv_msgbox_t *)mbox)->text;
+      lv_label_set_recolor(txt, true);
+      lv_obj_add_event_cb(mbox, [](lv_event_t *e) {
+        lv_msgbox_close(lv_obj_get_parent(lv_event_get_target(e)));
+      }, LV_EVENT_VALUE_CHANGED, NULL);
+      style_lock_mbox(mbox, 50);
+      return false;
+    }
+
+    return true;
   }
 
   void notify_toast(const std::string &msg, uint32_t timeout_ms) {

@@ -649,10 +649,12 @@ void SysInfoPanel::show_reset_options() {
 
   lv_obj_add_event_cb(btn2, [](lv_event_t *e) {
     if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
+    if (!KUtils::check_maintenance_guard("factory reset printer")) return;
     ((SysInfoPanel *)e->user_data)->show_reset_confirm(
       "Factory Reset Printer?",
       "This will erase all print files, saved Wi-Fi\nnetworks, Klipper settings, and calibration.\nYour printer will restart with factory defaults.\n\nThis cannot be undone.",
       []() {
+        if (!KUtils::check_maintenance_guard("factory reset printer")) return;
         spdlog::warn("Factory reset printer: executing S58factoryreset reset");
         system("/etc/init.d/S58factoryreset reset");
       }

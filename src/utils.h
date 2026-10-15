@@ -45,6 +45,12 @@ namespace KUtils {
   // jogging/extruding (filament runout, manual M600 colour change) is safe and
   // we let Homing/Extrude through.
   bool is_paused();
+  // True if heaters are actively heating or hot (extruder > 60°C or target > 0;
+  // bed > 55°C or target > 0). Populates details string if non-null.
+  bool is_hot(std::string *details = nullptr);
+  // Safety guard: checks if printer is safe for maintenance operations (not printing/paused,
+  // and heaters not hot/active). If blocked, displays an informative modal and returns false.
+  bool check_maintenance_guard(const std::string &action_name);
   // Modal "Unavailable while printing" notice (single OK button).
   void notify_locked();
   // Transient, auto-dismissing message (no buttons). Used for non-blocking
