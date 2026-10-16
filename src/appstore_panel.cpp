@@ -472,6 +472,7 @@ AppStorePanel::~AppStorePanel() {
 void AppStorePanel::foreground() {
   is_visible = true;
   refresh_apps();
+  build_category_bar();
   build_app_list();
   lv_obj_move_foreground(cont);
 
@@ -528,7 +529,7 @@ void AppStorePanel::build_category_bar() {
 
     bool is_sel = (current_category == cat.id);
     if (is_sel) {
-      lv_obj_set_style_bg_color(btn, lv_palette_main(LV_PALETTE_BLUE), 0);
+      lv_obj_set_style_bg_color(btn, lv_theme_get_color_primary(btn), 0);
     } else {
       lv_obj_set_style_bg_color(btn, lv_palette_darken(LV_PALETTE_GREY, 3), 0);
     }
