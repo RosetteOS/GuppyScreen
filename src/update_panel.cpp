@@ -1179,24 +1179,27 @@ void UpdatePanel::show_confirmation_modal(const UpdatePackageItem &pkg) {
 
   // Dialog card inside overlay
   lv_obj_t *card = lv_obj_create(modal_cont);
-  lv_obj_set_size(card, LV_PCT(90), LV_PCT(88));
+  lv_obj_set_size(card, LV_PCT(92), LV_PCT(90));
   lv_obj_center(card);
   lv_obj_set_style_bg_color(card, lv_palette_darken(LV_PALETTE_GREY, 4), 0);
   lv_obj_set_style_bg_opa(card, LV_OPA_COVER, 0);
-  lv_obj_set_style_border_color(card, lv_palette_main(LV_PALETTE_BLUE), 0);
+  lv_obj_set_style_border_color(card, lv_theme_get_color_primary(card), 0);
   lv_obj_set_style_border_width(card, 2, 0);
   lv_obj_set_style_radius(card, 12, 0);
-  lv_obj_set_style_pad_all(card, 16, 0);
+  lv_obj_set_style_pad_all(card, 10, 0);
+  lv_obj_set_style_pad_gap(card, 6, 0);
+  lv_obj_set_flex_flow(card, LV_FLEX_FLOW_COLUMN);
   lv_obj_clear_flag(card, LV_OBJ_FLAG_SCROLLABLE);
 
   lv_obj_t *title = lv_label_create(card);
   lv_label_set_text(title, pkg.is_remote ? "Confirm Remote Firmware Update" : "Confirm System Firmware Update");
   lv_obj_set_style_text_font(title, &lv_font_montserrat_16, 0);
-  lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 0);
+  lv_obj_set_width(title, LV_PCT(100));
+  lv_obj_set_style_text_align(title, LV_TEXT_ALIGN_CENTER, 0);
 
   lv_obj_t *content_cont = lv_obj_create(card);
-  lv_obj_set_size(content_cont, LV_PCT(100), LV_PCT(68));
-  lv_obj_align(content_cont, LV_ALIGN_TOP_MID, 0, 26);
+  lv_obj_set_width(content_cont, LV_PCT(100));
+  lv_obj_set_flex_grow(content_cont, 1);
   lv_obj_set_flex_flow(content_cont, LV_FLEX_FLOW_COLUMN);
   lv_obj_set_style_pad_all(content_cont, 4, 0);
   lv_obj_set_style_pad_gap(content_cont, 6, 0);
@@ -1248,13 +1251,25 @@ void UpdatePanel::show_confirmation_modal(const UpdatePackageItem &pkg) {
     lv_label_set_long_mode(cl_text, LV_LABEL_LONG_WRAP);
   }
 
+  // Bottom action buttons row
+  lv_obj_t *btn_row = lv_obj_create(card);
+  lv_obj_set_size(btn_row, LV_PCT(100), LV_SIZE_CONTENT);
+  lv_obj_set_flex_flow(btn_row, LV_FLEX_FLOW_ROW);
+  lv_obj_set_flex_align(btn_row, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+  lv_obj_set_style_pad_all(btn_row, 0, 0);
+  lv_obj_set_style_pad_hor(btn_row, 4, 0);
+  lv_obj_set_style_bg_opa(btn_row, LV_OPA_TRANSP, 0);
+  lv_obj_set_style_border_width(btn_row, 0, 0);
+  lv_obj_clear_flag(btn_row, LV_OBJ_FLAG_SCROLLABLE);
+
   // Cancel button
-  lv_obj_t *cancel_btn = lv_btn_create(card);
-  lv_obj_set_size(cancel_btn, 130, 44);
-  lv_obj_align(cancel_btn, LV_ALIGN_BOTTOM_LEFT, 10, 0);
+  lv_obj_t *cancel_btn = lv_btn_create(btn_row);
+  lv_obj_set_size(cancel_btn, 130, 40);
   lv_obj_set_style_bg_color(cancel_btn, lv_palette_darken(LV_PALETTE_GREY, 2), 0);
+  lv_obj_set_style_radius(cancel_btn, 6, 0);
   lv_obj_t *cancel_lbl = lv_label_create(cancel_btn);
   lv_label_set_text(cancel_lbl, "Cancel");
+  lv_obj_set_style_text_font(cancel_lbl, &lv_font_montserrat_14, 0);
   lv_obj_center(cancel_lbl);
 
   lv_obj_add_event_cb(cancel_btn, [](lv_event_t *e) {
@@ -1264,13 +1279,13 @@ void UpdatePanel::show_confirmation_modal(const UpdatePackageItem &pkg) {
   }, LV_EVENT_CLICKED, this);
 
   // Confirm button
-  lv_obj_t *confirm_btn = lv_btn_create(card);
-  lv_obj_set_size(confirm_btn, 160, 44);
-  lv_obj_align(confirm_btn, LV_ALIGN_BOTTOM_RIGHT, -10, 0);
+  lv_obj_t *confirm_btn = lv_btn_create(btn_row);
+  lv_obj_set_size(confirm_btn, 160, 40);
   lv_color_t confirm_color = blocked
     ? lv_palette_darken(LV_PALETTE_GREY, 3)
     : (pkg.is_remote ? lv_theme_get_color_primary(confirm_btn) : lv_palette_main(LV_PALETTE_GREEN));
   lv_obj_set_style_bg_color(confirm_btn, confirm_color, 0);
+  lv_obj_set_style_radius(confirm_btn, 6, 0);
   if (blocked) {
     lv_obj_add_state(confirm_btn, LV_STATE_DISABLED);
   }
@@ -1284,6 +1299,7 @@ void UpdatePanel::show_confirmation_modal(const UpdatePackageItem &pkg) {
   } else {
     lv_label_set_text(confirm_lbl, "Flash Update");
   }
+  lv_obj_set_style_text_font(confirm_lbl, &lv_font_montserrat_14, 0);
   lv_obj_center(confirm_lbl);
 
   lv_obj_add_event_cb(confirm_btn, [](lv_event_t *e) {
@@ -1329,7 +1345,7 @@ void UpdatePanel::show_progress_view(const UpdatePackageItem &pkg) {
   lv_obj_center(card);
   lv_obj_set_style_bg_color(card, lv_palette_darken(LV_PALETTE_GREY, 4), 0);
   lv_obj_set_style_bg_opa(card, LV_OPA_COVER, 0);
-  lv_obj_set_style_border_color(card, lv_palette_main(LV_PALETTE_BLUE), 0);
+  lv_obj_set_style_border_color(card, lv_theme_get_color_primary(card), 0);
   lv_obj_set_style_border_width(card, 2, 0);
   lv_obj_set_style_radius(card, 12, 0);
   lv_obj_set_style_pad_all(card, 16, 0);
