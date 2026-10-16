@@ -872,7 +872,7 @@ namespace KUtils {
     Config *conf = Config::get_instance();
     auto init_script = conf->get<std::string>("/guppy_init_script");
     if (init_script == "service guppyscreen" || init_script.empty()) {
-      init_script = "/etc/init.d/S58guppyscreen";
+      init_script = "/etc/init.d/S58touch-ui";
     }
     const fs::path script(init_script);
     if (fs::exists(script)) {
@@ -882,10 +882,10 @@ namespace KUtils {
         return false;
       }
       return true;
-    } else if (fs::exists("/etc/init.d/S58guppyscreen")) {
-      int rc = sp::call("/etc/init.d/S58guppyscreen restart");
+    } else if (fs::exists("/etc/init.d/S58touch-ui")) {
+      int rc = sp::call("/etc/init.d/S58touch-ui restart");
       if (rc != 0) {
-        spdlog::warn("Restart Guppy Screen fallback: '/etc/init.d/S58guppyscreen restart' exited with code {}", rc);
+        spdlog::warn("Restart Guppy Screen fallback: '/etc/init.d/S58touch-ui restart' exited with code {}", rc);
         return false;
       }
       return true;
