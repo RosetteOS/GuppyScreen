@@ -588,8 +588,8 @@ void SysInfoPanel::show_reset_options() {
   };
 
   lv_obj_t *btn1 = make_opt_btn(
-    "Reset GuppyScreen settings",
-    "Deletes display config and sensor layout.\nGuppyScreen restarts with defaults."
+    "Reset RoseUI settings",
+    "Deletes display config and sensor layout.\nRoseUI restarts with defaults."
   );
 
   // RosetteOS Phase 0 cleanup: /etc/init.d/S58factoryreset is confirmed absent
@@ -616,7 +616,7 @@ void SysInfoPanel::show_reset_options() {
 
   lv_obj_t *btn3 = make_opt_btn(
     "Reset Touch Calibration",
-    "Clears saved calibration coefficients.\nGuppyScreen restarts and asks you to recalibrate."
+    "Clears saved calibration coefficients.\nRoseUI restarts and asks you to recalibrate."
   );
 
   lv_obj_t *close_btn = lv_btn_create(box);
@@ -636,12 +636,12 @@ void SysInfoPanel::show_reset_options() {
   lv_obj_add_event_cb(btn1, [](lv_event_t *e) {
     if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
     ((SysInfoPanel *)e->user_data)->show_reset_confirm(
-      "Reset GuppyScreen settings?",
-      "Deletes guppyconfig.json and restarts.\nKlipper keeps running.\n\nThis cannot be undone.",
+      "Reset RoseUI settings?",
+      "Deletes display config and restarts.\nKlipper keeps running.\n\nThis cannot be undone.",
       []() {
         Config *conf = Config::get_instance();
         fs::remove(conf->get_path());
-        spdlog::warn("GuppyScreen config reset.");
+        spdlog::warn("RoseUI config reset.");
         _exit(0);
       }
     );
@@ -665,7 +665,7 @@ void SysInfoPanel::show_reset_options() {
     if (lv_event_get_code(e) != LV_EVENT_CLICKED) return;
     ((SysInfoPanel *)e->user_data)->show_reset_confirm(
       "Reset Touch Calibration?",
-      "Clears saved calibration. GuppyScreen\nwill restart and ask you to recalibrate.",
+      "Clears saved calibration. RoseUI\nwill restart and ask you to recalibrate.",
       []() {
         spdlog::warn("Touch calibration reset requested.");
         Config *conf = Config::get_instance();

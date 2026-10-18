@@ -878,19 +878,19 @@ namespace KUtils {
     if (fs::exists(script)) {
       int rc = sp::call(init_script + " restart");
       if (rc != 0) {
-        spdlog::warn("Restart Guppy Screen: '{} restart' exited with code {}", init_script, rc);
+        spdlog::warn("Restart RoseUI: '{} restart' exited with code {}", init_script, rc);
         return false;
       }
       return true;
     } else if (fs::exists("/etc/init.d/S58touch-ui")) {
       int rc = sp::call("/etc/init.d/S58touch-ui restart");
       if (rc != 0) {
-        spdlog::warn("Restart Guppy Screen fallback: '/etc/init.d/S58touch-ui restart' exited with code {}", rc);
+        spdlog::warn("Restart RoseUI fallback: '/etc/init.d/S58touch-ui restart' exited with code {}", rc);
         return false;
       }
       return true;
     } else {
-      spdlog::warn("Failed to restart Guppy Screen. Restart script not found: {}", init_script);
+      spdlog::warn("Failed to restart RoseUI. Restart script not found: {}", init_script);
       return false;
     }
   }

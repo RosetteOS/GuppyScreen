@@ -24,7 +24,7 @@ WARNINGS		:= -Wall -Wextra -Wno-unused-function -Wno-error=strict-prototypes -Wp
 					-Wunreachable-code -Wno-switch-default -Wreturn-type -Wmultichar -Wformat-security -Wno-sign-compare
 CFLAGS 			?= -O3 -g0 -MD -MP -I$(LVGL_DIR)/ $(WARNINGS) 
 LDFLAGS 		?= -static -lm -Llibhv/lib -Lspdlog/build -l:libhv.a -latomic -lpthread -Lwpa_supplicant/wpa_supplicant/ -l:libwpa_client.a -lstdc++fs -l:libspdlog.a
-BIN 			= guppyscreen
+BIN 			?= roseui
 BUILD_DIR 		= ./build
 BUILD_OBJ_DIR 	= $(BUILD_DIR)/obj
 BUILD_BIN_DIR 	= $(BUILD_DIR)/bin
@@ -214,6 +214,7 @@ kd_graphic_mode: $(BUILD_OBJ_DIR)/kd_graphic_mode.o
 default: $(TARGET)
 	@mkdir -p $(dir $(BUILD_BIN_DIR)/)
 	$(CXX) -o $(BUILD_BIN_DIR)/$(BIN) $(TARGET) $(LDFLAGS) $(LDLIBS)
+	@if [ "$(BIN)" != "guppyscreen" ]; then ln -sf $(BIN) $(BUILD_BIN_DIR)/guppyscreen; fi
 	@echo "CXX $<"
 
 spdlogclean:
@@ -231,9 +232,11 @@ clean:
 install:
 	install -d $(DESTDIR)$(bindir)
 	install $(BUILD_BIN_DIR)/$(BIN) $(DESTDIR)$(bindir)
+	@if [ "$(BIN)" != "guppyscreen" ]; then ln -sf $(BIN) $(DESTDIR)$(bindir)/guppyscreen; fi
 
 uninstall:
 	$(RM) -r $(addprefix $(DESTDIR)$(bindir)/,$(BIN))
+	@if [ "$(BIN)" != "guppyscreen" ]; then $(RM) $(DESTDIR)$(bindir)/guppyscreen; fi
 
 build:
 	$(MAKE) wpaclean

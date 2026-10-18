@@ -209,9 +209,9 @@ void SettingPanel::show_power_dialog() {
     LV_PALETTE_GREY
   );
 
-  // 3. Restart GuppyScreen
+  // 3. Restart RoseUI
   lv_obj_t *guppy_btn = make_opt_btn(
-    "Restart GuppyScreen",
+    "Restart RoseUI",
     "Restarts the display user interface without touching Klipper.",
     LV_PALETTE_GREY
   );
@@ -318,10 +318,10 @@ void SettingPanel::show_power_dialog() {
     auto *self = static_cast<SettingPanel*>(e->user_data);
     lv_obj_del_async(lv_obj_get_parent(lv_obj_get_parent(lv_obj_get_parent(lv_event_get_current_target(e)))));
     self->show_confirm(
-      "Restart GuppyScreen?",
-      "Restarts the display user interface without touching Klipper.\n\nAre you sure you want to restart GuppyScreen?",
+      "Restart RoseUI?",
+      "Restarts the display user interface without touching Klipper.\n\nAre you sure you want to restart RoseUI?",
       []() {
-        spdlog::info("Restarting GuppyScreen from power dialog");
+        spdlog::info("Restarting RoseUI from power dialog");
         KUtils::restart_guppyscreen();
       }
     );

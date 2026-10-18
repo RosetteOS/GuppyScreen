@@ -25,10 +25,12 @@ build_inside_container() {
     bash scripts/build-mips.sh
 
     echo "== Stripping MIPS binaries =="
-    mipsel-linux-strip build/bin/guppyscreen build/bin/guppybeep
+    mipsel-linux-strip build/bin/roseui build/bin/guppybeep 2>/dev/null || true
+    [ -f build/bin/guppyscreen ] && mipsel-linux-strip build/bin/guppyscreen 2>/dev/null || true
 
     echo "=== Build finished successfully ==="
-    file build/bin/guppyscreen
+    file build/bin/roseui
+    [ -f build/bin/guppyscreen ] && file build/bin/guppyscreen
     file build/bin/guppybeep
 }
 
@@ -64,8 +66,9 @@ docker run --rm \
     -e ROSETTEOS_VERSION="${ROSETTEOS_VERSION:-1.0.0}" \
     -e GUPPY_THEME="${GUPPY_THEME:-blue}" \
     "${DOCKER_IMAGE}" \
-    "export PATH=\"\$GUPPYSCREEN_TOOLCHAIN_BIN:\$PATH\" && make wpaclient && make libhv.a && make libspdlog.a && bash scripts/build-mips.sh && mipsel-linux-strip build/bin/guppyscreen build/bin/guppybeep"
+    "export PATH=\"\$GUPPYSCREEN_TOOLCHAIN_BIN:\$PATH\" && make wpaclient && make libhv.a && make libspdlog.a && bash scripts/build-mips.sh && mipsel-linux-strip build/bin/roseui build/bin/guppybeep 2>/dev/null; [ -f build/bin/guppyscreen ] && mipsel-linux-strip build/bin/guppyscreen 2>/dev/null || true"
 
 echo "=== MIPS build completed successfully ==="
-file build/bin/guppyscreen
+file build/bin/roseui
+[ -f build/bin/guppyscreen ] && file build/bin/guppyscreen
 file build/bin/guppybeep

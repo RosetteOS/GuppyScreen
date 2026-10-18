@@ -18,7 +18,11 @@ std::vector<std::string> get_usb_touch_reset_roots() {
 }
 
 std::vector<std::string> get_usb_touch_reset_names() {
-  return {".guppy-reset-touch", ".guppy-reset-touch.txt",
+  return {".roseui-reset-touch", ".roseui-reset-touch.txt",
+          "roseui-reset-touch", "roseui-reset-touch.txt",
+          ".rose-reset-touch", ".rose-reset-touch.txt",
+          "rose-reset-touch", "rose-reset-touch.txt",
+          ".guppy-reset-touch", ".guppy-reset-touch.txt",
           "guppy-reset-touch", "guppy-reset-touch.txt"};
 }
 

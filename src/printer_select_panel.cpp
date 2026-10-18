@@ -42,7 +42,7 @@ PrinterSelectContainer::PrinterSelectContainer(PrinterSelectPanel &ps,
     lv_event_code_t code = lv_event_get_code(e);
     if (code == LV_EVENT_CLICKED) {
       PrinterSelectContainer *p = (PrinterSelectContainer*)e->user_data;
-      lv_obj_t *msgbox = p->prompt(fmt::format("Guppy Screen will restart. Do you want to switch to {}?",
+      lv_obj_t *msgbox = p->prompt(fmt::format("RoseUI will restart. Do you want to switch to {}?",
 					       p->name));
       lv_obj_add_event_cb(msgbox, [](lv_event_t *e) {
 	lv_obj_t *obj = lv_obj_get_parent(lv_event_get_target(e));

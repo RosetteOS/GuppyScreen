@@ -111,7 +111,10 @@ fi
 # --- guppybeep (hardware-PWM buzzer player) ---
 echo "=== Building guppybeep (buzzer) for MIPS ==="
 "${CROSS_COMPILE}gcc" -O2 -static -o build/bin/guppybeep k1/k1_mods/buzzer/guppybeep.c
+ln -sf guppybeep build/bin/rosebeep
+ln -sf guppybeep build/bin/roseui-beep
 
 echo "=== Build complete ==="
-file build/bin/guppyscreen
+file build/bin/roseui
+[ -f build/bin/guppyscreen ] && file build/bin/guppyscreen
 file build/bin/guppybeep
