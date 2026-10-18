@@ -151,12 +151,7 @@ void Config::init(std::string config_path, const std::string thumbdir) {
 
     auto &roseui_init = data["/roseui_init_script"_json_pointer];
     if (roseui_init.is_null()) {
-      auto &legacy_init = data["/guppy_init_script"_json_pointer];
-      if (!legacy_init.is_null() && legacy_init != "service guppyscreen") {
-        data["/roseui_init_script"_json_pointer] = legacy_init;
-      } else {
-        data["/roseui_init_script"_json_pointer] = "/etc/init.d/S58touch-ui";
-      }
+      data["/roseui_init_script"_json_pointer] = "/etc/init.d/S58touch-ui";
     }
 
     auto &ll = data[json::json_pointer(df() + "log_level")];
