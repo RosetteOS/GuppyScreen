@@ -66,7 +66,19 @@ GuppyScreen *GuppyScreen::init(std::function<void(lv_color_t, lv_color_t)> hal_i
   auto selected_theme = conf->get_json("/theme").empty()
           ? "red.json"
           : conf->get<std::string>("/theme") + ".json";
-  auto theme_config = fs::canonical(conf->get_path()).parent_path() / "themes" / selected_theme;
+  fs::path theme_config;
+  try {
+    theme_config = fs::canonical(conf->get_path()).parent_path() / "themes" / selected_theme;
+  } catch (...) {
+    theme_config = fs::path("/opt/roseui/themes") / selected_theme;
+  }
+  if (!fs::exists(theme_config)) {
+    if (fs::exists(fs::path("/opt/roseui/themes") / selected_theme)) {
+      theme_config = fs::path("/opt/roseui/themes") / selected_theme;
+    } else if (fs::exists("/opt/roseui/themes/red.json")) {
+      theme_config = "/opt/roseui/themes/red.json";
+    }
+  }
 
   ThemeConfig *theme_conf = ThemeConfig::get_instance();
   theme_conf->init(theme_config);

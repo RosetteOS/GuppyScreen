@@ -44,6 +44,12 @@ int main(void)
     Config *conf = Config::get_instance();
     auto exe_dir = fs::canonical("/proc/self/exe").parent_path();
     auto config_path = exe_dir / "roseuiconfig.json";
+    if (!fs::exists(config_path)) {
+      auto legacy_path = exe_dir / "guppyconfig.json";
+      if (fs::exists(legacy_path)) {
+        config_path = legacy_path;
+      }
+    }
     conf->init(config_path.string(), "/opt/printer_data/thumbnails");
 
     if (apply_touch_calibration_reset_from_usb()) {

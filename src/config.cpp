@@ -88,10 +88,11 @@ void Config::init(std::string config_path, const std::string thumbdir) {
         {"thumbnail_path", thumbdir},
         {"wpa_supplicant", "/var/run/wpa_supplicant"},
         {"display_sleep_sec", 600},
+        {"display_rotate", 2},
         {"default_extruder_temp", 240}
 #ifndef OS_ANDROID
-        , {"default_printer", "k1"},
-        {"printers", {{"k1", {
+        , {"default_printer", "default_printer"},
+        {"printers", {{"default_printer", {
                                  {"moonraker_api_key", false},
                                  {"moonraker_host", "127.0.0.1"},
                                  {"moonraker_port", 7125},
@@ -150,7 +151,12 @@ void Config::init(std::string config_path, const std::string thumbdir) {
 
     auto &roseui_init = data["/roseui_init_script"_json_pointer];
     if (roseui_init.is_null()) {
-      data["/roseui_init_script"_json_pointer] = "/etc/init.d/S58touch-ui";
+      auto &legacy_init = data["/guppy_init_script"_json_pointer];
+      if (!legacy_init.is_null() && legacy_init != "service guppyscreen") {
+        data["/roseui_init_script"_json_pointer] = legacy_init;
+      } else {
+        data["/roseui_init_script"_json_pointer] = "/etc/init.d/S58touch-ui";
+      }
     }
 
     auto &ll = data[json::json_pointer(df() + "log_level")];
@@ -163,7 +169,7 @@ void Config::init(std::string config_path, const std::string thumbdir) {
 #ifdef GUPPY_ROTATE
     data["/display_rotate"_json_pointer] = 3; // LV_DISP_ROT_270
 #else
-    data["/display_rotate"_json_pointer] = 0; // LV_DISP_ROT_0
+    data["/display_rotate"_json_pointer] = 2; // LV_DISP_ROT_180
 #endif
   }
 
