@@ -271,7 +271,7 @@ void WifiPanel::try_import_usb_credentials() {
     "/usb", "/tmp/udisk", "/media/usb", "/mnt/usb"
   };
   static const char *const names[] = {
-    "roseui-wifi.conf"
+    "rosetteos-wifi.conf"
   };
 
   std::string source_path;
