@@ -42,7 +42,7 @@ SettingPanel::SettingPanel(KWebSocketClient &c, std::mutex &l, lv_obj_t *parent,
   , printer_profile_btn(cont, &print, "Printer\nModel", &SettingPanel::_handle_callback, this)
   , appstore_btn(cont, &layers_img, "App\nStore", &SettingPanel::_handle_callback, this)
   , spoolman_btn(cont, &spoolman_img, "Spoolman", &SettingPanel::_handle_callback, this)
-  , guppy_update_btn(cont, &update_img, "System\nUpdate", &SettingPanel::_handle_callback, this)
+  , roseui_update_btn(cont, &update_img, "System\nUpdate", &SettingPanel::_handle_callback, this)
 #ifdef ZBOLT
   , sysinfo_btn(cont, &info_img, "System", &SettingPanel::_handle_callback, this)
 #else
@@ -69,7 +69,7 @@ SettingPanel::SettingPanel(KWebSocketClient &c, std::mutex &l, lv_obj_t *parent,
   lv_obj_set_grid_cell(wifi_btn.get_container(), LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
   lv_obj_set_grid_cell(printer_profile_btn.get_container(), LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
   lv_obj_set_grid_cell(appstore_btn.get_container(), LV_GRID_ALIGN_STRETCH, 2, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
-  lv_obj_set_grid_cell(guppy_update_btn.get_container(), LV_GRID_ALIGN_STRETCH, 3, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
+  lv_obj_set_grid_cell(roseui_update_btn.get_container(), LV_GRID_ALIGN_STRETCH, 3, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
 
   // Row 2
   lv_obj_set_grid_cell(spoolman_btn.get_container(), LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 2, 1);
@@ -106,7 +106,7 @@ void SettingPanel::handle_callback(lv_event_t *event) {
     } else if (btn == appstore_btn.get_container()) {
       spdlog::trace("setting app store pressed");
       appstore_panel.foreground();
-    } else if (btn == guppy_update_btn.get_container()) {
+    } else if (btn == roseui_update_btn.get_container()) {
       spdlog::trace("setting system update pressed");
       update_panel.foreground();
     } else if (btn == printer_profile_btn.get_container()) {
@@ -210,7 +210,7 @@ void SettingPanel::show_power_dialog() {
   );
 
   // 3. Restart RoseUI
-  lv_obj_t *guppy_btn = make_opt_btn(
+  lv_obj_t *roseui_btn = make_opt_btn(
     "Restart RoseUI",
     "Restarts the display user interface without touching Klipper.",
     LV_PALETTE_GREY
@@ -314,7 +314,7 @@ void SettingPanel::show_power_dialog() {
     }
   }, LV_EVENT_CLICKED, this);
 
-  lv_obj_add_event_cb(guppy_btn, [](lv_event_t *e) {
+  lv_obj_add_event_cb(roseui_btn, [](lv_event_t *e) {
     auto *self = static_cast<SettingPanel*>(e->user_data);
     lv_obj_del_async(lv_obj_get_parent(lv_obj_get_parent(lv_obj_get_parent(lv_event_get_current_target(e)))));
     self->show_confirm(
@@ -322,7 +322,7 @@ void SettingPanel::show_power_dialog() {
       "Restarts the display user interface without touching Klipper.\n\nAre you sure you want to restart RoseUI?",
       []() {
         spdlog::info("Restarting RoseUI from power dialog");
-        KUtils::restart_guppyscreen();
+        KUtils::restart_roseui();
       }
     );
   }, LV_EVENT_CLICKED, this);

@@ -25,13 +25,11 @@ build_inside_container() {
     bash scripts/build-mips.sh
 
     echo "== Stripping MIPS binaries =="
-    mipsel-linux-strip build/bin/roseui build/bin/guppybeep 2>/dev/null || true
-    [ -f build/bin/guppyscreen ] && mipsel-linux-strip build/bin/guppyscreen 2>/dev/null || true
+    mipsel-linux-strip build/bin/roseui build/bin/rosebeep 2>/dev/null || true
 
     echo "=== Build finished successfully ==="
     file build/bin/roseui
-    [ -f build/bin/guppyscreen ] && file build/bin/guppyscreen
-    file build/bin/guppybeep
+    file build/bin/rosebeep
 }
 
 # If already inside the container with MIPS toolchain available

@@ -868,10 +868,10 @@ namespace KUtils {
     return is_slot2_active() ? "2" : "1";
   }
 
-  bool restart_guppyscreen() {
+  bool restart_roseui() {
     Config *conf = Config::get_instance();
-    auto init_script = conf->get<std::string>("/guppy_init_script");
-    if (init_script == "service guppyscreen" || init_script.empty()) {
+    auto init_script = conf->get<std::string>("/roseui_init_script");
+    if (init_script.empty()) {
       init_script = "/etc/init.d/S58touch-ui";
     }
     const fs::path script(init_script);
@@ -879,13 +879,6 @@ namespace KUtils {
       int rc = sp::call(init_script + " restart");
       if (rc != 0) {
         spdlog::warn("Restart RoseUI: '{} restart' exited with code {}", init_script, rc);
-        return false;
-      }
-      return true;
-    } else if (fs::exists("/etc/init.d/S58touch-ui")) {
-      int rc = sp::call("/etc/init.d/S58touch-ui restart");
-      if (rc != 0) {
-        spdlog::warn("Restart RoseUI fallback: '/etc/init.d/S58touch-ui restart' exited with code {}", rc);
         return false;
       }
       return true;

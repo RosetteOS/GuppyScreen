@@ -64,7 +64,7 @@ class SettingPanel {
   ButtonContainer printer_profile_btn;
   ButtonContainer appstore_btn;
   ButtonContainer spoolman_btn;
-  ButtonContainer guppy_update_btn;
+  ButtonContainer roseui_update_btn;
   ButtonContainer sysinfo_btn;
   ButtonContainer power_btn;
 };

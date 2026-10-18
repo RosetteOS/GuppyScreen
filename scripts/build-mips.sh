@@ -108,13 +108,10 @@ if ! make -j"$JOBS" "${MAKE_ARGS[@]}"; then
   make -j"$JOBS" "${MAKE_ARGS[@]}"
 fi
 
-# --- guppybeep (hardware-PWM buzzer player) ---
-echo "=== Building guppybeep (buzzer) for MIPS ==="
-"${CROSS_COMPILE}gcc" -O2 -static -o build/bin/guppybeep k1/k1_mods/buzzer/guppybeep.c
-ln -sf guppybeep build/bin/rosebeep
-ln -sf guppybeep build/bin/roseui-beep
+# --- rosebeep (hardware-PWM buzzer player) ---
+echo "=== Building rosebeep (buzzer) for MIPS ==="
+"${CROSS_COMPILE}gcc" -O2 -static -o build/bin/rosebeep k1/k1_mods/buzzer/guppybeep.c
 
 echo "=== Build complete ==="
 file build/bin/roseui
-[ -f build/bin/guppyscreen ] && file build/bin/guppyscreen
-file build/bin/guppybeep
+file build/bin/rosebeep

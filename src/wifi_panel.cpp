@@ -271,7 +271,7 @@ void WifiPanel::try_import_usb_credentials() {
     "/usb", "/tmp/udisk", "/media/usb", "/mnt/usb"
   };
   static const char *const names[] = {
-    "guppy-wifi.conf"
+    "roseui-wifi.conf"
   };
 
   std::string source_path;

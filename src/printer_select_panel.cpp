@@ -52,7 +52,7 @@ PrinterSelectContainer::PrinterSelectContainer(PrinterSelectPanel &ps,
 	  conf->set<std::string>("/default_printer", ((PrinterSelectContainer*)e->user_data)->name);
 	  conf->save();
 
-	  KUtils::restart_guppyscreen();
+	  KUtils::restart_roseui();
 	}
 	
 	lv_msgbox_close(obj);

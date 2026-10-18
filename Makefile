@@ -214,7 +214,6 @@ kd_graphic_mode: $(BUILD_OBJ_DIR)/kd_graphic_mode.o
 default: $(TARGET)
 	@mkdir -p $(dir $(BUILD_BIN_DIR)/)
 	$(CXX) -o $(BUILD_BIN_DIR)/$(BIN) $(TARGET) $(LDFLAGS) $(LDLIBS)
-	@if [ "$(BIN)" != "guppyscreen" ]; then ln -sf $(BIN) $(BUILD_BIN_DIR)/guppyscreen; fi
 	@echo "CXX $<"
 
 spdlogclean:
@@ -232,11 +231,9 @@ clean:
 install:
 	install -d $(DESTDIR)$(bindir)
 	install $(BUILD_BIN_DIR)/$(BIN) $(DESTDIR)$(bindir)
-	@if [ "$(BIN)" != "guppyscreen" ]; then ln -sf $(BIN) $(DESTDIR)$(bindir)/guppyscreen; fi
 
 uninstall:
 	$(RM) -r $(addprefix $(DESTDIR)$(bindir)/,$(BIN))
-	@if [ "$(BIN)" != "guppyscreen" ]; then $(RM) $(DESTDIR)$(bindir)/guppyscreen; fi
 
 build:
 	$(MAKE) wpaclean

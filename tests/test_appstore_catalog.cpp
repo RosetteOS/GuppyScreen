@@ -71,7 +71,7 @@ TEST(AppStoreCatalog, parses_manifest_json_correctly) {
     app.description = item.value("description", "");
     app.is_builtin = item.value("is_builtin", false);
     app.is_installed = app.is_builtin;
-    app.is_active = (app.id == "mainsail" || app.id == "guppyscreen");
+    app.is_active = (app.id == "mainsail" || app.id == "roseui");
     app.has_service = item.contains("service") || item.contains("service_init");
     app.service_status = app.is_installed && app.has_service ? "running" : (app.has_service ? "stopped" : "");
     app.status = app.is_active ? "active" : (app.is_installed ? "installed" : "available");
@@ -80,7 +80,7 @@ TEST(AppStoreCatalog, parses_manifest_json_correctly) {
 
   ASSERT_TRUE(std::any_of(apps.begin(), apps.end(), [](const TestAppItem &a) { return a.id == "mainsail" && a.is_builtin && a.is_active; }));
   ASSERT_TRUE(std::any_of(apps.begin(), apps.end(), [](const TestAppItem &a) { return a.id == "fluidd" && a.category == "web_ui"; }));
-  ASSERT_TRUE(std::any_of(apps.begin(), apps.end(), [](const TestAppItem &a) { return a.id == "guppyscreen" && a.is_builtin && a.is_active; }));
+  ASSERT_TRUE(std::any_of(apps.begin(), apps.end(), [](const TestAppItem &a) { return a.id == "roseui" && a.is_builtin && a.is_active; }));
   ASSERT_TRUE(std::any_of(apps.begin(), apps.end(), [](const TestAppItem &a) { return a.id == "helixscreen" && a.category == "touch_ui"; }));
   ASSERT_TRUE(std::any_of(apps.begin(), apps.end(), [](const TestAppItem &a) { return a.id == "spoolman" && a.category == "plugin" && a.has_service; }));
   ASSERT_TRUE(std::any_of(apps.begin(), apps.end(), [](const TestAppItem &a) { return a.id == "mobileraker" && a.category == "plugin" && a.has_service; }));
@@ -91,7 +91,7 @@ TEST(AppStoreCatalog, category_filtering_and_sorting) {
   std::vector<TestAppItem> apps = {
     {"mainsail", "Mainsail", "web_ui", "2.12.0", "Mainsail Crew", "", true, true, true, false, "", "active", -1, 0.0, 0.0, 0.0, "", ""},
     {"fluidd", "Fluidd", "web_ui", "1.30.0", "Fluidd Team", "", false, false, false, false, "", "available", -1, 0.0, 0.0, 0.0, "", ""},
-    {"guppyscreen", "GuppyScreen", "touch_ui", "1.0.0", "RosetteOS", "", true, true, true, false, "", "active", -1, 0.0, 0.0, 0.0, "", ""},
+    {"roseui", "RoseUI", "touch_ui", "1.0.0", "RosetteOS", "", true, true, true, false, "", "active", -1, 0.0, 0.0, 0.0, "", ""},
     {"helixscreen", "HelixScreen", "touch_ui", "0.5.0", "Helix", "", false, true, false, false, "", "installed", -1, 0.0, 0.0, 0.0, "", ""},
     {"spoolman", "Spoolman", "plugin", "0.20.0", "Donkie", "", false, false, false, true, "stopped", "available", -1, 0.0, 0.0, 0.0, "", ""}
   };
@@ -178,8 +178,8 @@ TEST(AppStoreCatalog, resource_usage_metrics_parsing) {
       "resource_summary": "CPU: 1.5% • RAM: 18.5 MB (14.5%)"
     },
     {
-      "id": "guppyscreen",
-      "name": "GuppyScreen",
+      "id": "roseui",
+      "name": "RoseUI",
       "category": "touch_ui",
       "is_installed": true,
       "is_active": true,

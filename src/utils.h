@@ -23,9 +23,8 @@ namespace KUtils {
   // Local mDNS hostname resolution (e.g. rosetteos.local)
   std::string get_mdns_hostname();
 
-  // RoseUI service restart with fallback
-  bool restart_guppyscreen();
-  inline bool restart_roseui() { return restart_guppyscreen(); }
+  // RoseUI service restart
+  bool restart_roseui();
 
   // Pre-cancel heating/startup delay explanation
   std::string get_heating_cancel_delay(State *s = nullptr);

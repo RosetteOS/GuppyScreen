@@ -74,7 +74,7 @@ static const void *get_app_icon(const AppItem &app) {
   if (icon == "fluidd" || id == "fluidd") {
     return &fine_tune_img;
   }
-  if (icon == "roseui" || id == "roseui" || icon == "guppyscreen" || id == "guppyscreen") {
+  if (icon == "roseui" || id == "roseui") {
     return &print;
   }
   if (icon == "helixscreen" || id == "helixscreen") {
@@ -150,7 +150,7 @@ static uint64_t get_pids_cpu_jiffies(const std::vector<int> &pids) {
 static std::vector<int> find_all_running_pids(const AppItem &app) {
   std::set<int> pids;
 
-  if ((app.id == "roseui" || app.id == "guppyscreen") && app.is_active) {
+  if (app.id == "roseui" && app.is_active) {
     pids.insert(getpid());
   }
 
@@ -634,7 +634,7 @@ void AppStorePanel::refresh_apps() {
           f >> j;
           if (j.contains("apps") && j["apps"].is_array()) {
             std::string active_web = "mainsail";
-            std::string active_touch = "guppyscreen";
+            std::string active_touch = "roseui";
             if (fs::exists("/usr/data/rosetteos/active_web_ui")) {
               std::ifstream awf("/usr/data/rosetteos/active_web_ui");
               std::string val;
@@ -700,8 +700,7 @@ void AppStorePanel::refresh_apps() {
               }
 
               app.is_active = (app.category == "web_ui" && app.id == active_web) ||
-                              (app.category == "touch_ui" && (app.id == active_touch ||
-                               ((app.id == "guppyscreen" || app.id == "roseui") && (active_touch == "guppyscreen" || active_touch == "roseui"))));
+                              (app.category == "touch_ui" && app.id == active_touch);
               app.has_update = (app.is_installed && !app.is_builtin && !app.installed_version.empty() && !app.version.empty() && app.installed_version != app.version);
 
               // Check service status
