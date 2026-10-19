@@ -1710,7 +1710,15 @@ void UpdatePanel::execute_update_thread(UpdatePackageItem pkg) {
           std::string img_name = msg.cur_image;
           std::stringstream ss;
           if (!img_name.empty()) {
-            ss << "Writing " << img_name;
+            if (img_name == "xImage") {
+              ss << "Updating Kernel";
+            } else if (img_name == "rootfs.squashfs" || img_name == "rootfs") {
+              ss << "Updating System Files";
+            } else if (img_name == "zero.bin") {
+              ss << "Updating Bootloader";
+            } else {
+              ss << "Writing " << img_name;
+            }
             if (msg.nsteps > 1) {
               ss << " (Step " << msg.cur_step << "/" << msg.nsteps << ": " << msg.cur_percent << "%)";
             } else {
@@ -1733,19 +1741,21 @@ void UpdatePanel::execute_update_thread(UpdatePackageItem pkg) {
         std::ifstream lf(log_file);
         if (lf.is_open()) {
           std::string line, last_line;
-          int current_substage = 0; // 0=init, 1=kernel, 2=rootfs, 3=postinstall
+          int current_substage = 0; // 0=init, 1=bootloader, 2=kernel, 3=rootfs, 4=postinstall
           int stage_pct = 0;
 
           while (std::getline(lf, line)) {
             if (line.empty()) continue;
             last_line = line;
 
-            if (line.find("xImage") != std::string::npos || line.find("mmcblk0p5") != std::string::npos || line.find("mmcblk0p6") != std::string::npos) {
+            if (line.find("zero.bin") != std::string::npos || line.find("mmcblk0p3") != std::string::npos || line.find("mmcblk0p4") != std::string::npos) {
               current_substage = 1;
-            } else if (line.find("rootfs") != std::string::npos || line.find("mmcblk0p7") != std::string::npos || line.find("mmcblk0p8") != std::string::npos) {
+            } else if (line.find("xImage") != std::string::npos || line.find("mmcblk0p5") != std::string::npos || line.find("mmcblk0p6") != std::string::npos) {
               current_substage = 2;
-            } else if (line.find("postinstall") != std::string::npos) {
+            } else if (line.find("rootfs") != std::string::npos || line.find("mmcblk0p7") != std::string::npos || line.find("mmcblk0p8") != std::string::npos) {
               current_substage = 3;
+            } else if (line.find("postinstall") != std::string::npos) {
+              current_substage = 4;
             }
 
             // Look for percentage numbers e.g. " 45%" or "[========] 45%"
@@ -1766,15 +1776,18 @@ void UpdatePanel::execute_update_thread(UpdatePackageItem pkg) {
           int computed_pct = last_computed_pct;
           std::string stage_desc = "Flashing system partitions...";
 
-          if (current_substage == 3) {
+          if (current_substage == 4) {
             computed_pct = std::max(last_computed_pct, 90 + std::min(8, stage_pct / 12));
             stage_desc = "Configuring target boot slot (" + std::to_string(computed_pct) + "%)...";
-          } else if (current_substage == 2) {
+          } else if (current_substage == 3) {
             computed_pct = std::max(last_computed_pct, 30 + (stage_pct * 58) / 100);
-            stage_desc = "Writing rootfs partition (" + std::to_string(stage_pct > 0 ? stage_pct : computed_pct) + "%)...";
+            stage_desc = "Updating System Files (" + std::to_string(stage_pct > 0 ? stage_pct : computed_pct) + "%)...";
+          } else if (current_substage == 2) {
+            computed_pct = std::max(last_computed_pct, 15 + (stage_pct * 15) / 100);
+            stage_desc = "Updating Kernel (" + std::to_string(stage_pct > 0 ? stage_pct : computed_pct) + "%)...";
           } else if (current_substage == 1) {
-            computed_pct = std::max(last_computed_pct, 10 + (stage_pct * 20) / 100);
-            stage_desc = "Writing kernel partition (" + std::to_string(stage_pct > 0 ? stage_pct : computed_pct) + "%)...";
+            computed_pct = std::max(last_computed_pct, 5 + (stage_pct * 10) / 100);
+            stage_desc = "Updating Bootloader (" + std::to_string(stage_pct > 0 ? stage_pct : computed_pct) + "%)...";
           } else {
             auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - start_flash_time).count();
             computed_pct = std::min(15, 5 + static_cast<int>(elapsed * 2));
