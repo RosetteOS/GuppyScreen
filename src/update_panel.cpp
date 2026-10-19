@@ -877,13 +877,7 @@ void UpdatePanel::build_package_list() {
     lv_obj_t *btn = lv_btn_create(card);
     lv_obj_set_size(btn, 110, 42);
     lv_obj_align(btn, LV_ALIGN_RIGHT_MID, 0, 0);
-    if (pkg.is_remote) {
-      lv_obj_set_style_bg_color(btn, lv_theme_get_color_primary(btn), 0);
-    } else if (pkg.version_diff > 0) {
-      lv_obj_set_style_bg_color(btn, lv_palette_main(LV_PALETTE_GREEN), 0);
-    } else {
-      lv_obj_set_style_bg_color(btn, lv_theme_get_color_primary(btn), 0);
-    }
+    lv_obj_set_style_bg_color(btn, lv_theme_get_color_primary(btn), 0);
     lv_obj_set_style_radius(btn, 6, 0);
 
     lv_obj_t *btn_lbl = lv_label_create(btn);
@@ -1042,7 +1036,7 @@ void UpdatePanel::show_first_boot_whats_new_popup(const std::string &version, co
   lv_obj_move_foreground(whats_new_mbox);
   lv_obj_set_style_bg_color(whats_new_mbox, lv_palette_darken(LV_PALETTE_GREY, 4), 0);
   lv_obj_set_style_bg_opa(whats_new_mbox, LV_OPA_COVER, 0);
-  lv_obj_set_style_border_color(whats_new_mbox, lv_palette_main(LV_PALETTE_GREEN), 0);
+  lv_obj_set_style_border_color(whats_new_mbox, lv_theme_get_color_primary(whats_new_mbox), 0);
   lv_obj_set_style_border_width(whats_new_mbox, 2, 0);
   lv_obj_set_style_radius(whats_new_mbox, 12, 0);
   lv_obj_set_style_pad_all(whats_new_mbox, 14, 0);
@@ -1079,7 +1073,7 @@ void UpdatePanel::show_first_boot_whats_new_popup(const std::string &version, co
   lv_obj_t *btn = lv_btn_create(whats_new_mbox);
   lv_obj_set_size(btn, 160, 40);
   lv_obj_align(btn, LV_ALIGN_BOTTOM_MID, 0, 0);
-  lv_obj_set_style_bg_color(btn, lv_palette_main(LV_PALETTE_GREEN), 0);
+  lv_obj_set_style_bg_color(btn, lv_theme_get_color_primary(btn), 0);
   lv_obj_set_style_radius(btn, 6, 0);
 
   lv_obj_t *btn_lbl = lv_label_create(btn);
@@ -1283,7 +1277,7 @@ void UpdatePanel::show_confirmation_modal(const UpdatePackageItem &pkg) {
   lv_obj_set_size(confirm_btn, 160, 40);
   lv_color_t confirm_color = blocked
     ? lv_palette_darken(LV_PALETTE_GREY, 3)
-    : (pkg.is_remote ? lv_theme_get_color_primary(confirm_btn) : lv_palette_main(LV_PALETTE_GREEN));
+    : lv_theme_get_color_primary(confirm_btn);
   lv_obj_set_style_bg_color(confirm_btn, confirm_color, 0);
   lv_obj_set_style_radius(confirm_btn, 6, 0);
   if (blocked) {
@@ -1379,7 +1373,7 @@ void UpdatePanel::show_progress_view(const UpdatePackageItem &pkg) {
   reboot_btn = lv_btn_create(card);
   lv_obj_set_size(reboot_btn, 160, 44);
   lv_obj_align(reboot_btn, LV_ALIGN_BOTTOM_MID, 0, 0);
-  lv_obj_set_style_bg_color(reboot_btn, lv_palette_main(LV_PALETTE_GREEN), 0);
+  lv_obj_set_style_bg_color(reboot_btn, lv_theme_get_color_primary(reboot_btn), 0);
   lv_obj_add_flag(reboot_btn, LV_OBJ_FLAG_HIDDEN);
 
   lv_obj_t *reboot_lbl = lv_label_create(reboot_btn);
@@ -1888,7 +1882,7 @@ void UpdatePanel::timer_tick() {
     }
     if (reboot_btn != nullptr) {
       lv_obj_clear_flag(reboot_btn, LV_OBJ_FLAG_HIDDEN);
-      lv_obj_set_style_bg_color(reboot_btn, lv_palette_main(LV_PALETTE_GREEN), 0);
+      lv_obj_set_style_bg_color(reboot_btn, lv_theme_get_color_primary(reboot_btn), 0);
       lv_obj_t *lbl = lv_obj_get_child(reboot_btn, 0);
       if (lbl) lv_label_set_text(lbl, "Reboot Now");
     }
